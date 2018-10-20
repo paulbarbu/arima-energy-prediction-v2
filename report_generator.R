@@ -26,3 +26,9 @@ report(model = 'Arima(order=c(1, 0, 0))',
        traindays = 7,
        testdays = 3)
 
+
+report(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0))',
+       series = '2hrs ph3',
+       startday = -10,
+       traindays = 7,
+       testdays = 3)

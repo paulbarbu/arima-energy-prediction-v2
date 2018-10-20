@@ -7,7 +7,7 @@ params:
   testdays: 3
 title: '`r params$model` on `r params$series`'
 author: 'Barbu Paul - Gheorghe'
-#date: "October 17, 2018"
+date: '`r Sys.time()`'
 output:
   html_document:
     toc: true
@@ -29,7 +29,9 @@ source('datasets.R')
 source('funcs.R')
 ```
 
-# Training & test data
+# Original data
+
+## Training & test data
 The data has been previously cleaned, negative values were made 0.
 Time series 80/20 rule goes in sequential order, not random.
 
@@ -58,6 +60,7 @@ season.labels = seq(frequency(data$train))
 ggseasonplot(data$train, season.labels = season.labels) +
   xlab("Season") +
   ylab("Energy [Watts]") +
+  guides(colour=guide_legend(title="Day")) +
   ggtitle('Seasonal plot for training data')
 
 ggsubseriesplot(data$train, labels = season.labels) +
@@ -68,18 +71,32 @@ ggsubseriesplot(data$train, labels = season.labels) +
                      labels = 1:frequency(data$train))
 ```
 
-# ACF & PACF of training data
+## ACF & PACF of training data
 
 ```{r acf-pacf, echo=FALSE}
 data$train %>% ggtsdisplay(main='Training Data', xlab='Observation [days]', ylab='Energy [Watts]')
 ```
 
-# Box-Cox transformations
+#Data transformations & differences
+
+## Box-Cox transformations
+
+* Original data points: $y_{1},\dots,y_{T}$
+* Transformed data points: $w_{1},\dots,w_{T}$
+
+$$
+w_t  =
+    \begin{cases}
+      \log(y_t)               & \text{if $\lambda=0$};  \\
+      (y_t^\lambda-1)/\lambda & \text{otherwise}.
+    \end{cases}
+$$  
 
 ```{r boxcox, echo=FALSE}
 lambda <- BoxCox.lambda(data$train)
 ```
-Suggested BoxCox transformation on the training data: **`r lambda`**
+
+Suggested BoxCox transformation on the training data: $\mathbf{\lambda=`r lambda`}$
 
 ```{r boxcox-applied, echo=FALSE}
 autoplot(BoxCox(data$train, lambda)) +
