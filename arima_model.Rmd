@@ -45,9 +45,11 @@ autoplot(data$train, series="Train") +
   guides(colour=guide_legend(title="Data Series"))
 ```
 
-Total data points: **`r length(datasets[[params$series]]$series)`** representing **`r round(length(datasets[[params$series]]$series)/frequency(data$train))`** days.
+Total data points: **`r length(datasets[[params$series]]$series)`** representing
+**`r round(length(datasets[[params$series]]$series)/frequency(data$train))`** days.
 
-Number of data points per day: **`r frequency(data$train)`** (gathered once every **`r (24*60)/frequency(data$train)`** minutes)
+Number of data points per day: **`r frequency(data$train)`**
+(gathered once every **`r (24*60)/frequency(data$train)`** minutes).
 
 Starting from: **`r params$startday`**.
 
@@ -96,7 +98,8 @@ $$
 lambda <- BoxCox.lambda(data$train)
 ```
 
-Suggested BoxCox transformation on the training data: $\mathbf{\lambda=`r lambda`}$
+Suggested BoxCox transformation on the training data:
+$\mathbf{\lambda=`r lambda`}$
 
 ```{r boxcox-applied, echo=FALSE}
 autoplot(BoxCox(data$train, lambda)) +
@@ -107,9 +110,11 @@ autoplot(BoxCox(data$train, lambda)) +
 
 ## ACF & PACF after differencing and transforming
 
-Suggested number of differences to make data stationary: **`r ndiffs(data$train)`**.
+Suggested number of differences to make data stationary:
+**`r ndiffs(data$train)`**.
 
-Suggested number of seasonal differences to make data stationary: **`r nsdiffs(data$train)`**.
+Suggested number of seasonal differences to make data stationary:
+**`r nsdiffs(data$train)`**.
 
 ```{r diffs}
 data$train %>% diff() %>%
@@ -134,7 +139,8 @@ eval(parse(text=paste('data$train %>%', params$model))) -> fit
 times <- toc()
 ```
 
-The model **`r params$model`** was evaluated on **`r params$train`** days in **`r times$toc - times$tic`** seconds.
+The model **`r params$model`** was evaluated on **`r params$train`** days
+in **`r times$toc - times$tic`** seconds.
 
 ## Model summary
 
@@ -159,7 +165,8 @@ Box-Ljung test:
 
 * H~0~ states that the data points are independently distributed.
 * High p-value (> 0.05) doesn't reject H~0~.
-* If Q\* is large: the autocorrelations do not come from a white noise series (so Q\* should be small)
+* If Q\* is large: the autocorrelations do not come from a white noise series
+(so Q\* should be small)
 
 ```{r residuals-pacf, echo=FALSE}
 ggPacf(data$residuals) +
