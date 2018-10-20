@@ -1,0 +1,154 @@
+---
+params:
+  model: Arima(order=c(1, 0, 0))
+  series: "2hrs ph3"
+  startday: -10
+  traindays: 7
+  testdays: 3
+title: "`r params$model` on `r params$series`"
+author: "Barbu Paul - Gheorghe"
+#date: "October 17, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r includes, warning=FALSE, include=FALSE}
+library(forecast)
+library(ggplot2)
+library(tictoc)
+
+source('datasets.R')
+source('funcs.R')
+```
+
+# Read the data
+Data is already read, but split it into train & test sets.
+Time series 80/20 rule goes in sequential order, not random.
+
+```{r data, echo=FALSE, message=FALSE, warning=FALSE}
+data <- get_days(datasets[[params$series]]$series, -10, 7, 3)
+autoplot(data$train, series="Train") +
+  autolayer(data$test, series="Test") +
+  xlab("Observation [days]") +
+  ylab("Energy [Watts]") +
+  ggtitle("Original data") + 
+  guides(colour=guide_legend(title="Data Series"))
+```
+
+Total data points: **`r length(datasets[[params$series]]$series)`** representing **`r round(length(datasets[[params$series]]$series)/frequency(data$train))`** days.
+
+Number of data points per day: **`r frequency(data$train)`** (gathered once every **`r (24*60)/frequency(data$train)`** minutes)
+
+Starting from: **`r params$startday`**.
+
+Train days: **`r params$traindays`**.
+
+Test days: **`r params$testdays`**.
+
+```{r subseries-plots, echo=FALSE}
+season.labels = seq(frequency(data$train))
+ggseasonplot(data$train, season.labels = season.labels) +
+  xlab("Season") +
+  ylab("Energy [Watts]") +
+  ggtitle('Seasonal plot for training data')
+
+ggsubseriesplot(data$train, labels = season.labels) +
+  xlab("Season") +
+  ylab("Energy [Watts]") +
+  ggtitle('Subseries plot for each season in the training data') +
+  scale_x_continuous(breaks = 0.5 + (1:frequency(data$train)),
+                     labels = 1:frequency(data$train))
+```
+
+# ACF & PACF of training data
+
+```{r acf-pacf, echo=FALSE}
+data$train %>% ggtsdisplay(main='Training Data', xlab='Observation [days]', ylab='Energy [Watts]')
+```
+
+# Box-Cox transformations
+
+```{r boxcox, echo=FALSE}
+lambda <- BoxCox.lambda(data$train)
+```
+Suggested BoxCox transformation on the training data: **`r lambda`**
+
+```{r boxcox-applied, echo=FALSE}
+autoplot(BoxCox(data$train, lambda)) +
+  xlab("Observation [days]") +
+  ylab("Energy [Watts]") +
+  ggtitle("Transformed Training Data")
+```
+
+## ACF & PACF after differencing and transforming
+
+```{r diffs}
+data$train %>% diff() %>% ggtsdisplay(main='First difference', xlab='Observation [days]', ylab='Energy Change [Watts]')
+data$train %>% diff() %>% diff(lag=frequency(data$train)) %>% ggtsdisplay(main='Second difference', xlab='Observation [days]', ylab='Energy Acceleration [Watts]')
+```
+
+# Model fitting & evaluation
+
+```{r model-fitting, include=FALSE}
+tic("Model fitting")
+#last_week %>% auto.arima(xreg=fourier(last_week, K=2), seasonal=F) -> fit
+eval(parse(text=paste('data$train %>%', params$model))) -> fit
+times <- toc()
+```
+
+The model **`r params$model`** was evaluated on **`r params$train`** days in **`r times$toc - times$tic`** seconds.
+
+## Model summary
+
+```{r summary-fit}
+summary(fit)
+```
+
+## Residuals statistics
+
+```{r residuals-stats, echo=FALSE}
+fit %>% residuals() -> data$residuals
+checkresiduals(fit, xlab='Observation [days]', ylab='Energy [Watts]') 
+ggPacf(data$residuals) + ggtitle('PACF of residuals')
+```
+
+```{r qq-plot, echo=FALSE, message=FALSE}
+ggplot(data.frame(y=data$residuals), aes(sample=y)) +
+  stat_qq() +
+  stat_qq_line() +
+  ggtitle('Residuals QQ-plot')
+```
+
+## Forecasting
+```{r forecast, echo=FALSE, include=FALSE}
+tic('Forecast')
+fit %>% forecast(h=params$testdays * frequency(data$test)) -> fcast
+#fit %>% forecast(xreg=fourier(last_week, K=2)) %>% autoplot()
+fcast.times <- toc()
+```
+
+Time elapapsed for forecasting **`r params$testdays`** days: **`r fcast.times$toc - fcast.times$tic`** seconds.
+
+### Accuracy of the forecasts against the test data
+```{r accuracy, echo=FALSE}
+accuracy(fcast, data$test)
+```
+
+### Fitted values and forecasts plot against the real data
+```{r fit-forecast-plot, echo=FALSE}
+fcast %>% autoplot(series='Forecast') +
+  autolayer(fitted(fit), series='Fitted') + 
+  autolayer(data$train, series = 'Train') +
+  autolayer(data$test, series='Test') +
+  xlab("Observation [days]") +
+  ylab("Energy [Watts]") +
+  guides(colour=guide_legend(title="Data Series"), fill=guide_legend(title="Prediction Interval"))
+```
+
+
+TODO: other statistical tests for stationarity, differencing, etc.
+TODO: name the file differently according to the params
+TODO: allow the model to be ran on the manually transformed data or not
