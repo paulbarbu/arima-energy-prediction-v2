@@ -8,7 +8,11 @@ params:
 title: "`r params$model` on `r params$series`"
 author: "Barbu Paul - Gheorghe"
 #date: "October 17, 2018"
-output: html_document
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    number_sections: true
 ---
 
 ```{r setup, include=FALSE}
@@ -25,6 +29,7 @@ source('funcs.R')
 ```
 
 # Training & test data
+The data has been previously cleaned, negative values were made 0.
 Time series 80/20 rule goes in sequential order, not random.
 
 ```{r data, echo=FALSE, message=FALSE, warning=FALSE}
@@ -84,17 +89,30 @@ autoplot(BoxCox(data$train, lambda)) +
 
 ## ACF & PACF after differencing and transforming
 
+Suggested number of differences to make data stationary: **`r ndiffs(data$train)`**.
+
+Suggested number of seasonal differences to make data stationary: **`r nsdiffs(data$train)`**.
+
 ```{r diffs}
-data$train %>% diff() %>% ggtsdisplay(main='First difference', xlab='Observation [days]', ylab='Energy Change [Watts]')
-data$train %>% diff() %>% diff(lag=frequency(data$train)) %>% ggtsdisplay(main='Second difference', xlab='Observation [days]', ylab='Energy Acceleration [Watts]')
+data$train %>% diff() %>%
+  ggtsdisplay(main='First difference',
+              xlab='Observation [days]',
+              ylab='Energy Change [Watts]')
+
+data$train %>% diff() %>% diff(lag=frequency(data$train)) %>%
+  ggtsdisplay(main='Second difference', 
+              xlab='Observation [days]', 
+              ylab='Energy Acceleration [Watts]')
 ```
 
 # Model fitting & evaluation
 
 ```{r model-fitting, include=FALSE}
 tic("Model fitting")
+
 #last_week %>% auto.arima(xreg=fourier(last_week, K=2), seasonal=F) -> fit
 eval(parse(text=paste('data$train %>%', params$model))) -> fit
+
 times <- toc()
 ```
 
@@ -108,10 +126,26 @@ summary(fit)
 
 ## Residuals statistics
 
-```{r residuals-stats, echo=FALSE}
+```{r include=FALSE}
 fit %>% residuals() -> data$residuals
-checkresiduals(fit, xlab='Observation [days]', ylab='Energy [Watts]') 
-ggPacf(data$residuals) + ggtitle('PACF of residuals')
+```
+
+
+```{r residuals-stats, echo=FALSE}
+checkresiduals(fit,
+               xlab='Observation [days]',
+               ylab='Energy [Watts]') 
+```
+
+Box-Ljung test:
+
+* H~0~ states that the data points are independently distributed.
+* High p-value (> 0.05) doesn't reject H~0~.
+* If Q\* is large: the autocorrelations do not come from a white noise series (so Q\* should be small)
+
+```{r residuals-pacf, echo=FALSE}
+ggPacf(data$residuals) +
+  ggtitle('PACF of residuals')
 ```
 
 ```{r qq-plot, echo=FALSE, message=FALSE}
@@ -124,8 +158,10 @@ ggplot(data.frame(y=data$residuals), aes(sample=y)) +
 ## Forecasting
 ```{r forecast, echo=FALSE, include=FALSE}
 tic('Forecast')
+
 fit %>% forecast(h=params$testdays * frequency(data$test)) -> fcast
-#fit %>% forecast(xreg=fourier(last_week, K=2)) %>% autoplot()
+#fit %>% forecast(xreg=fourier(data$, K=2)) %>% autoplot()
+
 fcast.times <- toc()
 ```
 
@@ -144,7 +180,8 @@ fcast %>% autoplot(series='Forecast') +
   autolayer(data$test, series='Test') +
   xlab("Observation [days]") +
   ylab("Energy [Watts]") +
-  guides(colour=guide_legend(title="Data Series"), fill=guide_legend(title="Prediction Interval"))
+  guides(colour=guide_legend(title="Data Series"), 
+         fill=guide_legend(title="Prediction Interval"))
 ```
 
 
