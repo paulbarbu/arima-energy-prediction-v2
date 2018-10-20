@@ -24,8 +24,7 @@ source('datasets.R')
 source('funcs.R')
 ```
 
-# Read the data
-Data is already read, but split it into train & test sets.
+# Training & test data
 Time series 80/20 rule goes in sequential order, not random.
 
 ```{r data, echo=FALSE, message=FALSE, warning=FALSE}
@@ -48,7 +47,7 @@ Train days: **`r params$traindays`**.
 
 Test days: **`r params$testdays`**.
 
-```{r subseries-plots, echo=FALSE}
+```{r subseries-plots, echo=FALSE, message=FALSE}
 season.labels = seq(frequency(data$train))
 ggseasonplot(data$train, season.labels = season.labels) +
   xlab("Season") +
