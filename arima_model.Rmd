@@ -1,18 +1,19 @@
 ---
 params:
   model: Arima(order=c(1, 0, 0))
-  series: "2hrs ph3"
+  series: '2hrs ph3'
   startday: -10
   traindays: 7
   testdays: 3
-title: "`r params$model` on `r params$series`"
-author: "Barbu Paul - Gheorghe"
+title: '`r params$model` on `r params$series`'
+author: 'Barbu Paul - Gheorghe'
 #date: "October 17, 2018"
 output:
   html_document:
     toc: true
     toc_float: true
     number_sections: true
+    self_contained: true
 ---
 
 ```{r setup, include=FALSE}
@@ -184,7 +185,16 @@ fcast %>% autoplot(series='Forecast') +
          fill=guide_legend(title="Prediction Interval"))
 ```
 
+# Future work
 
-TODO: other statistical tests for stationarity, differencing, etc.
-TODO: name the file differently according to the params
-TODO: allow the model to be ran on the manually transformed data or not
+* Add other statistical tests for stationarity, differencing, etc.
+* Allow the model to be ran on the manually transformed data (through a param)
+* Parallel processing for evaluating multiple models at the same time
+
+# References
+* [Forecasting: Principles and Practice, Rob J Hyndman and George Athanasopoulos, Monash University, Australia](https://otexts.org/fpp2/)
+* [Statistical forecasting: notes on regression and time series analysis, Robert Nau, Fuqua School of Business, Duke University](http://people.duke.edu/~rnau/411home.htm)
+* [Time Series Forecasting: Creating a seasonal ARIMA model using Python and Statsmodel, Sean Abu](http://www.seanabu.com/2016/03/22/time-series-seasonal-ARIMA-model-in-python/)
+* [How to Create an ARIMA Model for Time Series Forecasting in Python, Jason Brownlee](https://machinelearningmastery.com/arima-for-time-series-forecasting-with-python/)
+* [ Introduction to Forecasting with ARIMA in R, Ruslana Dalinina](https://www.datascience.com/blog/introduction-to-forecasting-with-arima-in-r-learn-data-science-tutorials)
+* [Seasonal periods, Rob J Hyndman](https://robjhyndman.com/hyndsight/seasonal-periods/)
