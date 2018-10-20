@@ -81,7 +81,7 @@ data$train %>% ggtsdisplay(main='Training Data', xlab='Observation [days]', ylab
 
 #Data transformations & differences
 
-## Box-Cox transformations
+## Box-Cox transformation
 
 * Original data points: $y_{1},\dots,y_{T}$
 * Transformed data points: $w_{1},\dots,w_{T}$
@@ -105,16 +105,26 @@ $\mathbf{\lambda=`r lambda`}$
 autoplot(BoxCox(data$train, lambda)) +
   xlab("Observation [days]") +
   ylab("Energy [Watts]") +
-  ggtitle("Transformed Training Data")
+  ggtitle(bquote("Transformed training data, "~ lambda ~ " = "~ .(lambda)))
 ```
 
-## ACF & PACF after differencing and transforming
+TODO: Plot the data transformed by the user if params$transformation is not identity()
+TODO: continue with data$train.transformed here
+
+TODO: say whether the following steps are applied on the transformed data or not (params$transformation != identity)
+
+## ACF & PACF after transforming & differencing the data
 
 Suggested number of differences to make data stationary:
 **`r ndiffs(data$train)`**.
 
 Suggested number of seasonal differences to make data stationary:
 **`r nsdiffs(data$train)`**.
+
+TODO: apply the diffops on the transformed data, set new transformed data, plot
+TODO: apply the seasonaldiffops on the transformed data, plot
+
+TODO: check the name of the file with diffs & transformations
 
 ```{r diffs}
 data$train %>% diff() %>%
@@ -123,7 +133,7 @@ data$train %>% diff() %>%
               ylab='Energy Change [Watts]')
 
 data$train %>% diff() %>% diff(lag=frequency(data$train)) %>%
-  ggtsdisplay(main='Second difference', 
+  ggtsdisplay(main='First & seasonal difference', 
               xlab='Observation [days]', 
               ylab='Energy Acceleration [Watts]')
 ```
@@ -139,7 +149,8 @@ eval(parse(text=paste('data$train %>%', params$model))) -> fit
 times <- toc()
 ```
 
-The model **`r params$model`** was evaluated on **`r params$train`** days
+The model **`r params$model`** was evaluated on **`r params$traindays`** days
+(representing **`r frequency(data$train) * params$traindays`** data points)
 in **`r times$toc - times$tic`** seconds.
 
 ## Model summary
@@ -190,7 +201,9 @@ fit %>% forecast(h=params$testdays * frequency(data$test)) -> fcast
 fcast.times <- toc()
 ```
 
-Time elapapsed for forecasting **`r params$testdays`** days: **`r fcast.times$toc - fcast.times$tic`** seconds.
+Time elapapsed for forecasting **`r params$testdays`** days
+(representing **`r frequency(data$test) * params$testdays`** data points):
+**`r fcast.times$toc - fcast.times$tic`** seconds.
 
 ### Accuracy of the forecasts against the test data
 ```{r accuracy, echo=FALSE}
@@ -222,3 +235,4 @@ fcast %>% autoplot(series='Forecast') +
 * [How to Create an ARIMA Model for Time Series Forecasting in Python, Jason Brownlee](https://machinelearningmastery.com/arima-for-time-series-forecasting-with-python/)
 * [ Introduction to Forecasting with ARIMA in R, Ruslana Dalinina](https://www.datascience.com/blog/introduction-to-forecasting-with-arima-in-r-learn-data-science-tutorials)
 * [Seasonal periods, Rob J Hyndman](https://robjhyndman.com/hyndsight/seasonal-periods/)
+* [Math Notation for R Plot Titles: expression and bquote, Tyler Rinker](https://www.r-bloggers.com/math-notation-for-r-plot-titles-expression-and-bquote/)
