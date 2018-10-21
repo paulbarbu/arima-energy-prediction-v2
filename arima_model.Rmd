@@ -1,7 +1,10 @@
 ---
 params:
-  model: Arima(order=c(1, 0, 0))
   series: '2hrs ph3'
+  model: Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0))
+  transformation: identity() #log() %>% (function(d) {d[d==-Inf]<-0; d})
+  diffs: identity() # diff() %>% diff()
+  sdiffs: identity() # diff(lag=frequency(data$train))
   startday: -10
   traindays: 7
   testdays: 3
@@ -42,7 +45,7 @@ autoplot(data$train, series="Train") +
   xlab("Observation [days]") +
   ylab("Energy [Watts]") +
   ggtitle("Original data") + 
-  guides(colour=guide_legend(title="Data Series"))
+  guides(colour=guide_legend(title="Data series"))
 ```
 
 Total data points: **`r length(datasets[[params$series]]$series)`** representing
@@ -76,7 +79,7 @@ ggsubseriesplot(data$train, labels = season.labels) +
 ## ACF & PACF of training data
 
 ```{r acf-pacf, echo=FALSE}
-data$train %>% ggtsdisplay(main='Training Data', xlab='Observation [days]', ylab='Energy [Watts]')
+data$train %>% ggtsdisplay(main='Training data', xlab='Observation [days]', ylab='Energy [Watts]')
 ```
 
 #Data transformations & differences
@@ -104,38 +107,76 @@ $\mathbf{\lambda=`r lambda`}$
 ```{r boxcox-applied, echo=FALSE}
 autoplot(BoxCox(data$train, lambda)) +
   xlab("Observation [days]") +
-  ylab("Energy [Watts]") +
-  ggtitle(bquote("Transformed training data, "~ lambda ~ " = "~ .(lambda)))
+  ylab("Transformed energy") +
+  ggtitle(bquote("Transformed training data, " ~ lambda ~ " = " ~ .(lambda)))
 ```
 
-TODO: Plot the data transformed by the user if params$transformation is not identity()
-TODO: continue with data$train.transformed here
+```{r apply-transformation, echo=FALSE}
+use_transformation <- !is.null(params$transformation) && params$transformation != 'identity()'
 
-TODO: say whether the following steps are applied on the transformed data or not (params$transformation != identity)
+eval(parse(text=paste('data$train %>%',
+                      params$transformation))) -> data$train.transformed
+```
+
+## Transformation
+
+Transformation: **`r params$transformation`**
+
+```{r plot-transformed-data, echo=FALSE, eval=use_transformation}
+autoplot(data$train.transformed) +
+  xlab("Observation [days]") +
+  ylab("Transformed energy") +
+  ggtitle(paste("Transformed data using:", params$transformation)) + 
+  guides(colour=guide_legend(title="Data series"))
+```
+
+**ATTENTION:** continuing with **`r if(use_transformation) 'transformed' else 'original'`** data!
 
 ## ACF & PACF after transforming & differencing the data
 
 Suggested number of differences to make data stationary:
-**`r ndiffs(data$train)`**.
+**`r ndiffs(data$train.transformed)`**.
 
 Suggested number of seasonal differences to make data stationary:
-**`r nsdiffs(data$train)`**.
-
-TODO: apply the diffops on the transformed data, set new transformed data, plot
-TODO: apply the seasonaldiffops on the transformed data, plot
+**`r nsdiffs(data$train.transformed)`**.
 
 TODO: check the name of the file with diffs & transformations
 
-```{r diffs}
-data$train %>% diff() %>%
-  ggtsdisplay(main='First difference',
-              xlab='Observation [days]',
-              ylab='Energy Change [Watts]')
+```{r apply-diffs, echo=FALSE}
+use_diffs <- !is.null(params$diffs) && params$diffs != 'identity()'
 
-data$train %>% diff() %>% diff(lag=frequency(data$train)) %>%
-  ggtsdisplay(main='First & seasonal difference', 
+eval(parse(text=paste('data$train.transformed %>%',
+                      params$diffs))) -> data$train.transformed.diffed
+```
+
+```{r apply-sdiffs, echo=FALSE}
+use_sdiffs <- !is.null(params$sdiffs) && params$sdiffs != 'identity()'
+
+eval(parse(text=paste('data$train.transformed.diffed %>%',
+                      params$sdiffs))) -> data$train.transformed.sdiffed
+```
+
+### Differences
+
+Differences: **`r params$diffs`**.
+
+```{r plot-diff, echo=FALSE, eval=use_diffs}
+data$train.transformed.diffed %>%
+  ggtsdisplay(main=paste('Transformed & differenced data using:', params$diffs),
+              xlab='Observation [days]',
+              ylab='Transformed & differenced energy')
+```
+
+### Seasonal differences
+
+Seasonal differences: **`r params$sdiffs`**.
+
+```{r plot-sdiff, echo=FALSE, eval=use_sdiffs}
+data$train.transformed.sdiffed %>%
+  ggtsdisplay(main=paste('Transformed & diffed & s. diffed data using:',
+                         params$diffs, 'and', params$sdiffs), 
               xlab='Observation [days]', 
-              ylab='Energy Acceleration [Watts]')
+              ylab='Transformed & diffed & s. diffed energy')
 ```
 
 # Model fitting & evaluation
@@ -144,13 +185,13 @@ data$train %>% diff() %>% diff(lag=frequency(data$train)) %>%
 tic("Model fitting")
 
 #last_week %>% auto.arima(xreg=fourier(last_week, K=2), seasonal=F) -> fit
-eval(parse(text=paste('data$train %>%', params$model))) -> fit
+eval(parse(text=paste('data$train.transformed %>%', params$model))) -> fit
 
 times <- toc()
 ```
 
 The model **`r params$model`** was evaluated on **`r params$traindays`** days
-(representing **`r frequency(data$train) * params$traindays`** data points)
+(representing **`r frequency(data$train.transformed) * params$traindays`** data points)
 in **`r times$toc - times$tic`** seconds.
 
 ## Model summary
@@ -218,8 +259,8 @@ fcast %>% autoplot(series='Forecast') +
   autolayer(data$test, series='Test') +
   xlab("Observation [days]") +
   ylab("Energy [Watts]") +
-  guides(colour=guide_legend(title="Data Series"), 
-         fill=guide_legend(title="Prediction Interval"))
+  guides(colour=guide_legend(title="Data series"), 
+         fill=guide_legend(title="Prediction interval"))
 ```
 
 # Future work

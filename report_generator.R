@@ -22,6 +22,9 @@ report <- function(...)
 
 report(model = 'Arima(order=c(1, 0, 0))',
        series = '2hrs ph3',
+       transformation = 'identity()',
+       diffs = 'identity()',
+       sdiffs = 'identity()',
        startday = -10,
        traindays = 7,
        testdays = 3)
@@ -29,6 +32,11 @@ report(model = 'Arima(order=c(1, 0, 0))',
 
 report(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0))',
        series = '2hrs ph3',
+       transformation = 'identity()',
+       diffs = 'identity()',
+       sdiffs = 'identity()',
        startday = -10,
        traindays = 7,
        testdays = 3)
+
+#TODO: auto.arima for all data
