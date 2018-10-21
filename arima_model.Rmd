@@ -32,6 +32,24 @@ source('datasets.R')
 source('funcs.R')
 ```
 
+# Parameters
+
+Series: **`r params$series`**.
+
+Model: **`r params$model`**.
+
+Transformation: **`r params$transformation`**.
+
+Differences: **`r params$diffs`**.
+
+Seasonal differences: **`r params$sdiffs`**.
+
+Starting from: **`r params$startday`**.
+
+Train days: **`r params$traindays`**.
+
+Test days: **`r params$testdays`**.
+
 # Original data
 
 ## Training & test data
@@ -53,12 +71,6 @@ Total data points: **`r length(datasets[[params$series]]$series)`** representing
 
 Number of data points per day: **`r frequency(data$train)`**
 (gathered once every **`r (24*60)/frequency(data$train)`** minutes).
-
-Starting from: **`r params$startday`**.
-
-Train days: **`r params$traindays`**.
-
-Test days: **`r params$testdays`**.
 
 ```{r subseries-plots, echo=FALSE, message=FALSE}
 season.labels = seq(frequency(data$train))
