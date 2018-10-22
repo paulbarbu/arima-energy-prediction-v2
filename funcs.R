@@ -82,7 +82,6 @@ fullforecast <- function(dataset, transformation, model, traindays, testdays, xr
   fcasts <- list()
   fcasts$points <- c()
   
-  #TODO: this can be heavily parallelized
   for(currentday in startday:endday)
   {
     datachunk <- get_days(dataset, currentday, traindays, testdays)

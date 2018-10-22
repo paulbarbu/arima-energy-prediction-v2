@@ -292,6 +292,7 @@ fcast %>% autoplot(series='Forecast') +
 * Add other statistical tests for stationarity, differencing, etc.
 * Allow the model to be ran on the manually transformed data (through a param)
 * Parallel processing for evaluating multiple models at the same time
+* Allow the number of Fourier terms (K) to be a vector and choose the best one automatically
 
 # References
 * [Forecasting: Principles and Practice, Rob J Hyndman and George Athanasopoulos, Monash University, Australia](https://otexts.org/fpp2/)

@@ -222,10 +222,6 @@ report(model = 'auto.arima()',
        traindays = 7,
        testdays = 1)
 
-
-#TODO: auto.arima for all data
-#TODO: set K to an interval in order to find the best one, how to choose it?
-
 # 2hrs ph3 full ----
 report.full(model = 'auto.arima()',
        series = '2hrs ph3',
@@ -241,6 +237,13 @@ report.full(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="ML")',
             testdays = 1)
 
 report.full(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="ML", xreg=fourier(., K=5))',
+            series = '2hrs ph3',
+            transformation = 'identity()',
+            traindays = 7,
+            testdays = 1,
+            xreg='fourier(., K=5, h=h)')
+
+report.full(model = 'auto.arima(xreg=fourier(., K=5))',
             series = '2hrs ph3',
             transformation = 'identity()',
             traindays = 7,

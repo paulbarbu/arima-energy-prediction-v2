@@ -97,3 +97,7 @@ autoplot(fulldata, series="Original") +
 ```{r forecast-accuracy, echo=FALSE}
 fcast$accuracy
 ```
+
+# Future work
+
+* The `fullforecast` method can be heavily paralellized
