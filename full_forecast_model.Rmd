@@ -1,0 +1,99 @@
+---
+params:
+  series: '2hrs ph3'
+  model: Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0))
+  transformation: identity() #log() %>% (function(d) {d[d==-Inf]<-0; d})
+  traindays: 7
+  testdays: 1
+  xreg: NULL
+title: '`r params$model` on full `r params$series`'
+author: 'Barbu Paul - Gheorghe'
+date: '`r Sys.time()`'
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    number_sections: true
+    self_contained: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r includes, warning=FALSE, include=FALSE}
+library(forecast)
+library(ggplot2)
+library(tictoc)
+
+source('datasets.R')
+source('funcs.R')
+```
+
+
+# Parameters
+
+Series: **`r params$series`**.
+
+Model: **`r params$model`**.
+
+Transformation: **`r params$transformation`**.
+
+Train days: **`r params$traindays`**.
+
+Test days: **`r params$testdays`**.
+
+xreg: **`r params$xreg`**.
+
+# Original data
+
+The data has been previously cleaned, negative values were made 0.
+
+```{r data, echo=FALSE, message=FALSE, warning=FALSE}
+fulldata <- datasets[[params$series]]$series
+totaldays <- round(length(fulldata)/frequency(fulldata))
+
+autoplot(fulldata, series="Full") +
+  xlab("Observation [days]") +
+  ylab("Energy [Watts]") +
+  ggtitle("Original data") + 
+  guides(colour=guide_legend(title="Data series"))
+```
+
+Total data points: **`r length(fulldata)`** representing
+**`r totaldays`** days.
+
+Number of data points per day: **`r frequency(fulldata)`**
+(gathered once every **`r (24*60)/frequency(fulldata)`** minutes).
+
+# Forecast data
+
+```{r get-forecast, message=FALSE, include=FALSE}
+tic('Forecast')
+
+fcast <- fullforecast(fulldata,
+                      params$transformation, 
+                      params$model, 
+                      params$traindays,
+                      params$testdays,
+                      params$xreg)
+fcast.times <- toc()
+```
+
+Time elapapsed for forecasting **`r totaldays - params$traindays`** days,
+initial training days are not taken into account,
+(representing **`r frequency(fulldata) * (totaldays - params$traindays)`** data points):
+**`r fcast.times$toc - fcast.times$tic`** seconds.
+
+```{r plot-forecast, echo=FALSE}
+autoplot(fulldata, series="Original") +
+  autolayer(fcast$points, series="Forecasts") +
+  xlab("Observation [days]") +
+  ylab("Energy [Watts]") +
+  ggtitle("Original data and forecasts") + 
+  guides(colour=guide_legend(title="Data series"))
+```
+
+```{r forecast-accuracy, echo=FALSE}
+fcast$accuracy
+```
