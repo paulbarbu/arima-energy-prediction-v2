@@ -8,6 +8,7 @@ params:
   startday: -10
   traindays: 7
   testdays: 3
+  xreg: NULL
 title: '`r params$model` on `r params$series`'
 author: 'Barbu Paul - Gheorghe'
 date: '`r Sys.time()`'
@@ -50,6 +51,8 @@ Train days: **`r params$traindays`**.
 
 Test days: **`r params$testdays`**.
 
+xreg: **`r params$xreg`**.
+
 # Original data
 
 ## Training & test data
@@ -57,7 +60,10 @@ The data has been previously cleaned, negative values were made 0.
 Time series 80/20 rule goes in sequential order, not random.
 
 ```{r data, echo=FALSE, message=FALSE, warning=FALSE}
-data <- get_days(datasets[[params$series]]$series, -10, 7, 3)
+data <- get_days(datasets[[params$series]]$series,
+                 params$startday,
+                 params$traindays, params$testdays)
+
 autoplot(data$train, series="Train") +
   autolayer(data$test, series="Test") +
   xlab("Observation [days]") +
@@ -151,8 +157,6 @@ Suggested number of differences to make data stationary:
 
 Suggested number of seasonal differences to make data stationary:
 **`r nsdiffs(data$train.transformed)`**.
-
-TODO: check the name of the file with diffs & transformations
 
 ```{r apply-diffs, echo=FALSE}
 use_diffs <- !is.null(params$diffs) && params$diffs != 'identity()'
@@ -248,8 +252,16 @@ ggplot(data.frame(y=data$residuals), aes(sample=y)) +
 ```{r forecast, echo=FALSE, include=FALSE}
 tic('Forecast')
 
-fit %>% forecast(h=params$testdays * frequency(data$test)) -> fcast
-#fit %>% forecast(xreg=fourier(data$, K=2)) %>% autoplot()
+fourier.terms <- NULL
+h <- params$testdays * frequency(data$test)
+
+if(!is.null(params$xreg))
+{
+  eval(parse(text=paste('data$test %>%', params$xreg))) -> fourier.terms
+}
+
+fit %>% forecast(h=h, 
+                 xreg=fourier.terms) -> fcast
 
 fcast.times <- toc()
 ```
