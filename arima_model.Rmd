@@ -208,7 +208,8 @@ times <- toc()
 
 The model **`r params$model`** was evaluated on **`r params$traindays`** days
 (representing **`r frequency(data$train.transformed) * params$traindays`** data points)
-in **`r times$toc - times$tic`** seconds.
+in **`r times$toc - times$tic`** seconds
+(**`r (times$toc - times$tic)/60`** minutes).
 
 ## Model summary
 
@@ -268,7 +269,8 @@ fcast.times <- toc()
 
 Time elapapsed for forecasting **`r params$testdays`** days
 (representing **`r frequency(data$test) * params$testdays`** data points):
-**`r fcast.times$toc - fcast.times$tic`** seconds.
+**`r fcast.times$toc - fcast.times$tic`** seconds
+(**`r (fcast.times$toc - fcast.times$tic)/60`** minutes).
 
 ### Accuracy of the forecasts against the test data
 ```{r accuracy, echo=FALSE}

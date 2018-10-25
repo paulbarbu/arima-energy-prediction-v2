@@ -1,3 +1,6 @@
+library(foreach)
+library(doParallel)
+library(forecast)
 
 # series= datasets[['1hrs ph3']]$series; x = get_days(series, 0, 1, 1); View(series); View(x$train); View(x$test)
 # series= datasets[['1hrs ph3']]$series; x = get_days(series, 1, 1, 1); View(series); View(x$train); View(x$test)
@@ -82,7 +85,18 @@ fullforecast <- function(dataset, transformation, model, traindays, testdays, xr
   fcasts <- list()
   fcasts$points <- c()
   
-  for(currentday in startday:endday)
+  numcores <- max(1, detectCores() - 1)
+  
+  cl<-makeCluster(numcores)
+  registerDoParallel(cl)
+  
+  print(paste('Running on', numcores, 'cores')) 
+  
+  fcasts$points <- foreach(currentday = startday:endday,
+                           .export = c("get_days"),
+                           .packages = c("forecast"),
+                           .combine = c, 
+                           .verbose = TRUE) %dopar%
   {
     datachunk <- get_days(dataset, currentday, traindays, testdays)
     
@@ -100,8 +114,11 @@ fullforecast <- function(dataset, transformation, model, traindays, testdays, xr
     }
     
     fit %>% forecast(h=h, xreg=fourier.terms) -> chunk.fcast
-    fcasts$points <- c(fcasts$points, chunk.fcast$mean)
+    
+    return(chunk.fcast$mean)
   }
+  
+  stopCluster(cl)
   
   fcasts$points <- ts(fcasts$points, start=traindays, frequency = frequency(dataset))
   testpoints <- get_days(dataset, traindays, NULL, NULL)$train

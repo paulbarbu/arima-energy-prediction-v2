@@ -83,7 +83,8 @@ fcast.times <- toc()
 Time elapapsed for forecasting **`r totaldays - params$traindays`** days,
 initial training days are not taken into account,
 (representing **`r frequency(fulldata) * (totaldays - params$traindays)`** data points):
-**`r fcast.times$toc - fcast.times$tic`** seconds.
+**`r fcast.times$toc - fcast.times$tic`** seconds
+(**`r (fcast.times$toc - fcast.times$tic)/60`** minutes).
 
 ```{r plot-forecast, echo=FALSE}
 autoplot(fulldata, series="Original") +
@@ -100,4 +101,4 @@ fcast$accuracy
 
 # Future work
 
-* The `fullforecast` method can be heavily paralellized
+* ?
