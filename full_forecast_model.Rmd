@@ -96,7 +96,7 @@ autoplot(fulldata, series="Original") +
 ```
 
 ```{r forecast-accuracy, echo=FALSE}
-fcast$accuracy
+knitr::kable(fcast$accuracy)
 ```
 
 # Future work

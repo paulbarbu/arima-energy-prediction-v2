@@ -274,7 +274,7 @@ Time elapapsed for forecasting **`r params$testdays`** days
 
 ### Accuracy of the forecasts against the test data
 ```{r accuracy, echo=FALSE}
-accuracy(fcast, data$test)
+knitr::kable(accuracy(fcast, data$test))
 ```
 
 ### Fitted values and forecasts plot against the real data
