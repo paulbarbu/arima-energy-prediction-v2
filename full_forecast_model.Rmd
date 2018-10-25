@@ -101,4 +101,4 @@ fcast$accuracy
 
 # Future work
 
-* ?
+* Some models (e.g. with fourier terms for the seasonality) may go into the negative values, this cannot be taken care of during the modelling/forecasting phase with these kind of models (since we cannot control the ampitude of the seasonality in each point) and would have to be corrected after forecasting in order to replace all negative values with zeros
