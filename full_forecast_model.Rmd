@@ -68,6 +68,7 @@ Number of data points per day: **`r frequency(fulldata)`**
 
 # Forecast data
 
+## Forecasts plot against the data
 ```{r get-forecast, message=FALSE, include=FALSE}
 tic('Forecast')
 
@@ -95,6 +96,7 @@ autoplot(fulldata, series="Original") +
   guides(colour=guide_legend(title="Data series"))
 ```
 
+## Accuracy of the forecasts against the data
 ```{r forecast-accuracy, echo=FALSE}
 knitr::kable(fcast$accuracy)
 ```
