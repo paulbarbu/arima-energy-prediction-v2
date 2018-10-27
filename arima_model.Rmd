@@ -290,7 +290,7 @@ autoplot(fcast) +
   ylab("Energy [Watts]") +
   guides(colour=guide_legend(title="Data series"), 
          fill=guide_legend(title="Prediction interval")) +
-  scale_color_manual(values=clrs) 
+  scale_color_manual(values=clrs)
 ```
 
 # Future work
