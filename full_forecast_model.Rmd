@@ -1,7 +1,7 @@
 ---
 params:
   series: '2hrs ph3'
-  model: Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0))
+  model: Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="ML")
   transformation: identity() #log() %>% (function(d) {d[d==-Inf]<-0; d})
   traindays: 7
   testdays: 1
