@@ -293,6 +293,15 @@ autoplot(fcast) +
   scale_color_manual(values=clrs)
 ```
 
+Please note that the negative prediction intervals are due to the way these are
+computed, the point forecast plus/minus the standard deviation multiplied by the 95% or 80% critical value of the two tailed Z distribution, this usually means the point forecast plus/minus twice the standard error. 
+([ref. page 10](https://people.duke.edu/~rnau/Notes_on_linear_regression_analysis--Robert_Nau.pdf)).
+
+The negative part should be limited at zero during the interpretation of the
+results, but it is not on the plot due to simmetry and graphical reasons.
+
+
+
 # Future work
 
 * Add other statistical tests for stationarity, differencing, etc.
