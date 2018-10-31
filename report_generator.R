@@ -3,6 +3,26 @@ library(fs)
 
 source('funcs.R')
 
+# benchmark models  ----
+
+report.full(model = 'snaive()',
+            series = '2hrs ph3',
+            transformation = 'identity()',
+            traindays = 7,
+            testdays = 1)
+
+report.full(model = 'meanf()',
+            series = '2hrs ph3',
+            transformation = 'identity()',
+            traindays = 7,
+            testdays = 1)
+
+report.full(model = 'naive()',
+            series = '2hrs ph3',
+            transformation = 'identity()',
+            traindays = 7,
+            testdays = 1)
+
 # 2hrs ph3 Simple Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0)) ----
 # arima(1,0,0)(1,0,0)
 

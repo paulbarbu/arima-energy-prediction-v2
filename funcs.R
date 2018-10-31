@@ -103,17 +103,37 @@ fullforecast <- function(dataset, transformation, model, traindays, testdays, xr
     eval(parse(text=paste('datachunk$train %>%',
                           transformation))) -> datachunk$train.transformed
     
-    eval(parse(text=paste('datachunk$train.transformed %>%', model))) -> fit
-    
-    fourier.terms <- NULL
     h <- testdays * frequency(datachunk$test)
     
-    if(!is.null(xreg))
+    # for naive, snaive and meanf models
+    # the model already returns the forecasts, no separate forecast step
+    # is needed
+    if(any(startsWith(model, c("naive()", "snaive()", "meanf()"))))
     {
-      eval(parse(text=paste('datachunk$test %>%', xreg))) -> fourier.terms
-    }
+      model <- sub("()", paste("(h=", h, ")", sep=""), model, fixed=TRUE)
+    } 
     
-    fit %>% forecast(h=h, xreg=fourier.terms) -> chunk.fcast
+    eval(parse(text=paste('datachunk$train.transformed %>%', model))) -> fit
+    
+    fcast <- NULL
+    
+    # for naive, snaive and meanf models
+    # the model already returns the forecasts, no separate forecast step
+    # is needed
+    if(any(startsWith(model, c("naive(", "snaive(", "meanf("))))
+    {
+      chunk.fcast <- fit
+    } else
+    {
+      fourier.terms <- NULL
+      
+      if(!is.null(xreg))
+      {
+        eval(parse(text=paste('datachunk$test %>%', xreg))) -> fourier.terms
+      }
+      
+      fit %>% forecast(h=h, xreg=fourier.terms) -> chunk.fcast
+    }
     
     return(chunk.fcast$mean)
   }
