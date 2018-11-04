@@ -286,3 +286,72 @@ report.full(model = 'auto.arima(xreg=fourier(., K=5))',
             traindays = 7,
             testdays = 1,
             xreg='fourier(., K=5, h=h)')
+
+
+# ARIMA(1,0,0)(1,0,0) on 4:1 days and ARIAM(1, 0, 0)(1, 0, 0) with Fourier on 7:1 ----
+
+# TODO:Fit the seasonality using fourier terms and the errors using the logic above
+
+best.fcast.2hrsPh3 <- NULL
+best.traindays <- 0
+best.testdays <- 0
+
+for(traindays in 3:7)
+{
+  for(testdays in 1:3)
+  {
+    print(paste("Trying", traindays, "train days and", testdays, "test days"))
+    current <- fullforecast(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="ML")',
+                dataset = datasets[['2hrs ph3']]$series,
+                transformation = 'identity()',
+                traindays = traindays,
+                testdays = testdays,
+                xreg=NULL)
+    
+    if(is.null(best.fcast.2hrsPh3) || current$accuracy[[2]] < best.fcast.2hrsPh3$accuracy[[2]])
+    {
+      best.fcast.2hrsPh3 <- current
+      best.traindays <- traindays
+      best.testdays <- testdays
+    }
+    
+  }
+}
+
+report.full(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="ML")',
+            series = '2hrs ph3',
+            transformation = 'identity()',
+            traindays = best.traindays, # 4
+            testdays = best.testdays) # 1
+
+best.fcast.fourier.2hrsPh3 <- NULL
+best.fourier.traindays <- 0
+best.fourier.testdays <- 0
+
+for(traindays in 3:7)
+{
+  for(testdays in 1:3)
+  {
+    print(paste("Trying", traindays, "train days and", testdays, "test days"))
+    current <- fullforecast(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="ML", xreg=fourier(., K=5))',
+                            dataset = datasets[['2hrs ph3']]$series,
+                            transformation = 'identity()',
+                            traindays = traindays,
+                            testdays = testdays,
+                            xreg='fourier(., K=5, h=h)')
+    
+    if(is.null(best.fcast.fourier.2hrsPh3) || current$accuracy[[2]] < best.fcast.fourier.2hrsPh3$accuracy[[2]])
+    {
+      best.fcast.fourier.2hrsPh3 <- current
+      best.fourier.traindays <- traindays
+      best.fourier.testdays <- testdays
+    }
+    
+  }
+}
+
+report.full(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="ML")',
+            series = '2hrs ph3',
+            transformation = 'identity()',
+            traindays = best.fourier.traindays, # 6
+            testdays = best.fourier.testdays) # 1
