@@ -355,3 +355,37 @@ report.full(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="ML", x
             traindays = best.fourier.traindays, # 7
             testdays = best.fourier.testdays, # 1
             xreg='fourier(., K=5, h=h)')
+
+# Find best K for the above model ARIMA(1,0,0)(1,0,0) ----
+
+best.fcast.k.2hrsPh3 <- NULL
+best.k <- 0
+#K must be not be greater than period/2
+for(k in 1:(frequency(datasets[['2hrs ph3']]$series)/2))
+{
+  print(paste("Trying k =", k))
+  m <- paste('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="ML", xreg=fourier(., K=', k, '))', sep='')
+  xreg <- paste('fourier(., h=h, K=', k, ')')
+  current <- fullforecast(model = m,
+                          dataset = datasets[['2hrs ph3']]$series,
+                          transformation = 'identity()',
+                          traindays = best.fourier.traindays, # 7
+                          testdays = best.fourier.testdays, # 1
+                          xreg=xreg)
+  
+  if(is.null(best.fcast.k.2hrsPh3) || current$accuracy[[2]] < best.fcast.k.2hrsPh3$accuracy[[2]])
+  {
+    best.fcast.k.2hrsPh3 <- current
+    best.k <- k
+  }
+}
+
+report.full(model = paste('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="ML", xreg=fourier(., K=', best.k, '))', sep=''),
+            series = '2hrs ph3',
+            transformation = 'identity()',
+            traindays = best.fourier.traindays, # 7
+            testdays = best.fourier.testdays, # 1
+            xreg = paste('fourier(., h=h, K=', best.k, ')'))
+
+
+# Best model: ARIMA(1, 0, 0)(1, 0, 0) (K=1) RMSE 320----
