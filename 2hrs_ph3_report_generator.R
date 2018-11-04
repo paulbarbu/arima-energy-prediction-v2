@@ -288,7 +288,7 @@ report.full(model = 'auto.arima(xreg=fourier(., K=5))',
             xreg='fourier(., K=5, h=h)')
 
 
-# ARIMA(1,0,0)(1,0,0) on 4:1 days and ARIAM(1, 0, 0)(1, 0, 0) with Fourier on 7:1 ----
+# ARIMA(1,0,0)(1,0,0) on 4:1 days and ARIMA(1, 0, 0)(1, 0, 0) with Fourier(k=5) on 7:1 ----
 
 # TODO:Fit the seasonality using fourier terms and the errors using the logic above
 
@@ -314,7 +314,6 @@ for(traindays in 3:7)
       best.traindays <- traindays
       best.testdays <- testdays
     }
-    
   }
 }
 
@@ -350,8 +349,9 @@ for(traindays in 3:7)
   }
 }
 
-report.full(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="ML")',
+report.full(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="ML", xreg=fourier(., K=5))',
             series = '2hrs ph3',
             transformation = 'identity()',
-            traindays = best.fourier.traindays, # 6
-            testdays = best.fourier.testdays) # 1
+            traindays = best.fourier.traindays, # 7
+            testdays = best.fourier.testdays, # 1
+            xreg='fourier(., K=5, h=h)')
