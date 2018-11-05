@@ -68,6 +68,7 @@ report.full <- function(...)
   
   print(sprintf('Generating full data report file: %s/%s', dirname, filename))
   
+  gc()
   render("full_forecast_model.Rmd",
          params = report.params,
          output_file = filename,
@@ -75,6 +76,7 @@ report.full <- function(...)
          quiet = TRUE)  
   
   print(sprintf('Done: %s/%s', dirname, filename))
+  gc()
 }
 
 
@@ -93,6 +95,8 @@ fullforecast <- function(dataset, transformation, model, traindays, testdays, xr
   registerDoParallel(cl)
   
   print(paste('Running on', numcores, 'cores')) 
+  
+  gc()
   
   fcasts$points <- foreach(currentday = startday:endday,
                            .export = c("get_days"),
@@ -138,8 +142,12 @@ fullforecast <- function(dataset, transformation, model, traindays, testdays, xr
       fit %>% forecast(h=h, xreg=fourier.terms) -> chunk.fcast
     }
     
+    gc()
+    
     return(chunk.fcast$mean)
   }
+  
+  gc()
   
   stopCluster(cl)
   
@@ -200,7 +208,11 @@ fullforecast.serial <- function(dataset, transformation, model, traindays, testd
     }
     
     fcasts$points <- c(fcasts$points, chunk.fcast$mean)
+    
+    gc()
   }
+  
+  gc()
   
   fcasts$points <- ts(fcasts$points, start=traindays, frequency = frequency(dataset))
   testpoints <- get_days(dataset, traindays, NULL, NULL)$train
