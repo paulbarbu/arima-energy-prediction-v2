@@ -1,6 +1,3 @@
-library(rmarkdown)
-library(fs)
-
 source('funcs.R')
 
 # benchmark models  ----
@@ -389,3 +386,33 @@ report.full(model = paste('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="
 
 
 # Best model: ARIMA(1, 0, 0)(1, 0, 0) (K=1) RMSE 320----
+
+
+
+
+
+# observation based modelling ----
+report(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="ML")',
+       series = '2hrs ph3',
+       transformation = 'identity()',
+       diffs = 'identity()',
+       sdiffs = 'identity()',
+       startday = 0,
+       traindays = 24,
+       testdays = 12,
+       obs = TRUE)
+
+report.full(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS")',
+            series = '2hrs ph3',
+            transformation = 'identity()',
+            traindays = 48,
+            testdays = 1,
+            obs=TRUE)
+
+report.full(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="ML", xreg=fourier(., K=1))',
+            series = '2hrs ph3',
+            transformation = 'identity()',
+            traindays = 48,
+            testdays = 1,
+            xreg = 'fourier(., h=h, K=1)',
+            obs = TRUE)

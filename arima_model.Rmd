@@ -9,6 +9,7 @@ params:
   traindays: 7
   testdays: 3
   xreg: NULL
+  obs: FALSE
 title: '`r params$model` on `r params$series`'
 author: 'Barbu Paul - Gheorghe'
 date: '`r Sys.time()`'
@@ -45,6 +46,8 @@ Differences: **`r params$diffs`**.
 
 Seasonal differences: **`r params$sdiffs`**.
 
+As observations: **`r params$obs`**.
+
 Starting from: **`r params$startday`**.
 
 Train days: **`r params$traindays`**.
@@ -60,9 +63,16 @@ The data has been previously cleaned, negative values were made 0.
 Time series 80/20 rule goes in sequential order, not random.
 
 ```{r data, echo=FALSE, message=FALSE, warning=FALSE}
-data <- get_days(datasets[[params$series]]$series,
+if(params$obs)
+{
+  data <- get_obs(datasets[[params$series]]$series,
                  params$startday,
                  params$traindays, params$testdays)
+} else {
+  data <- get_days(datasets[[params$series]]$series,
+                   params$startday,
+                   params$traindays, params$testdays)
+}
 
 autoplot(data$train, series="Train") +
   autolayer(data$test, series="Test") +
@@ -79,6 +89,10 @@ Number of data points per day: **`r frequency(data$train)`**
 (gathered once every **`r (24*60)/frequency(data$train)`** minutes).
 
 ```{r subseries-plots, echo=FALSE, message=FALSE}
+
+# TODO: try catch this
+if(!params$obs)
+{
 season.labels = seq(frequency(data$train))
 ggseasonplot(data$train, season.labels = season.labels) +
   xlab("Season") +
@@ -86,12 +100,13 @@ ggseasonplot(data$train, season.labels = season.labels) +
   guides(colour=guide_legend(title="Day")) +
   ggtitle('Seasonal plot for training data')
 
-ggsubseriesplot(data$train, labels = season.labels) +
-  xlab("Season") +
-  ylab("Energy [Watts]") +
-  ggtitle('Subseries plot for each season in the training data') +
-  scale_x_continuous(breaks = 0.5 + (1:frequency(data$train)),
-                     labels = 1:frequency(data$train))
+  ggsubseriesplot(data$train, labels = season.labels) +
+    xlab("Season") +
+    ylab("Energy [Watts]") +
+    ggtitle('Subseries plot for each season in the training data') +
+    scale_x_continuous(breaks = 0.5 + (1:frequency(data$train)),
+                       labels = 1:frequency(data$train))
+}
 ```
 
 ## ACF & PACF of training data
@@ -254,7 +269,13 @@ ggplot(data.frame(y=data$residuals), aes(sample=y)) +
 tic('Forecast')
 
 fourier.terms <- NULL
-h <- params$testdays * frequency(data$test)
+
+if(params$obs)
+{
+  h <- params$testdays
+}else {
+  h <- params$testdays * frequency(data$test)
+}
 
 if(!is.null(params$xreg))
 {
@@ -267,8 +288,8 @@ fit %>% forecast(h=h,
 fcast.times <- toc()
 ```
 
-Time elapapsed for forecasting **`r params$testdays`** days
-(representing **`r frequency(data$test) * params$testdays`** data points):
+Time elapapsed for forecasting **`r params$testdays`**
+`r ifelse(params$obs, "data points", paste("days (representing", frequency(data$test) * params$testdays, "data points)"))`:
 **`r fcast.times$toc - fcast.times$tic`** seconds
 (**`r (fcast.times$toc - fcast.times$tic)/60`** minutes).
 

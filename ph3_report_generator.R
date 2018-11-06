@@ -50,3 +50,11 @@ fullforecast.serial(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method
                     traindays = 7,
                     testdays = 1,
                     xreg = NULL)
+
+fullforecast.serial(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS")',
+                    dataset = datasets[['ph3']]$series,
+                    transformation = 'identity()',
+                    traindays = 2,
+                    testdays = 1,
+                    xreg = NULL,
+                    max.iterations = 1)

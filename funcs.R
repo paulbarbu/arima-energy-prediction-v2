@@ -1,6 +1,8 @@
 library(forecast)
 library(foreach)
 library(doParallel)
+library(fs)
+library(rmarkdown)
 
 source('datasets.R')
 
@@ -32,6 +34,37 @@ get_days <- function(dataset, startday, traindays = 7, testdays=3)
   else
   {
     days$test <- window(dataset, start=c(startday + traindays, 1), end=c(startday + traindays + testdays, 0))
+  }
+  
+  return(days)
+}
+
+get_obs <- function(dataset, startobs, trainobs = 7, testobs=3)
+{
+  if(startobs < 0) 
+  {
+    startobs <- length(dataset) + 1 + startobs
+    #print(paste("modified start day = ", startday))
+  }
+  days <- list()
+  
+  if(is.null(trainobs) || trainobs == 0)
+  {
+    days$train <- subset(dataset, start=startobs)
+    testobs <- NULL
+  }
+  else
+  {
+    days$train <- subset(dataset, start=startobs, end=startobs + trainobs-1)
+  }
+  
+  if(is.null(testobs) || testobs == 0)
+  {
+    days$test <- NULL
+  }
+  else
+  {
+    days$test <- subset(dataset, start=startobs + trainobs, end=startobs + trainobs + testobs-1)
   }
   
   return(days)
@@ -221,6 +254,84 @@ fullforecast.serial <- function(dataset, transformation, model, traindays, testd
   
   fcasts$points <- ts(fcasts$points, start=traindays, frequency = frequency(dataset))
   testpoints <- get_days(dataset, traindays, NULL, NULL)$train
+  
+  fcasts$accuracy <- accuracy(fcasts$points, testpoints)
+  
+  return(fcasts)
+}
+
+fullforecast.obs <- function(dataset, transformation, model, trainobs, testobs, xreg)
+{
+  startobs <- 0
+  endobs <- length(dataset) - (trainobs + testobs)
+  
+  fcasts <- list()
+  fcasts$points <- c()
+  
+  numcores <- max(1, detectCores() - 1)
+  
+  cl <- makeCluster(numcores)
+  registerDoParallel(cl)
+  
+  print(paste('Running on', numcores, 'cores')) 
+  
+  gc()
+  
+  fcasts$points <- foreach(currentobs = startobs:endobs,
+                           .export = c("get_obs"),
+                           .packages = c("forecast"),
+                           .combine = c, 
+                           .verbose = TRUE) %dopar%
+   {
+     print(paste("Current obs =", currentobs))
+     datachunk <- get_obs(dataset, currentobs, trainobs, testobs)
+     
+     eval(parse(text=paste('datachunk$train %>%',
+                           transformation))) -> datachunk$train.transformed
+     
+     h <- testobs
+     
+     # for naive, snaive and meanf models
+     # the model already returns the forecasts, no separate forecast step
+     # is needed
+     if(any(startsWith(model, c("naive()", "snaive()", "meanf()"))))
+     {
+       model <- sub("()", paste("(h=", h, ")", sep=""), model, fixed=TRUE)
+     } 
+     
+     eval(parse(text=paste('datachunk$train.transformed %>%', model))) -> fit
+     
+     fcast <- NULL
+     
+     # for naive, snaive and meanf models
+     # the model already returns the forecasts, no separate forecast step
+     # is needed
+     if(any(startsWith(model, c("naive(", "snaive(", "meanf("))))
+     {
+       chunk.fcast <- fit
+     } else
+     {
+       fourier.terms <- NULL
+       
+       if(!is.null(xreg))
+       {
+         eval(parse(text=paste('datachunk$test %>%', xreg))) -> fourier.terms
+       }
+       
+       fit %>% forecast(h=h, xreg=fourier.terms) -> chunk.fcast
+     }
+     
+     gc()
+     
+     return(chunk.fcast$mean)
+   }
+  
+  gc()
+  
+  stopCluster(cl)
+  
+  fcasts$points <- ts(fcasts$points, start=trainobs/frequency(dataset), frequency = frequency(dataset))
+  testpoints <- get_obs(dataset, trainobs, NULL, NULL)$train
   
   fcasts$accuracy <- accuracy(fcasts$points, testpoints)
   

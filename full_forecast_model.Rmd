@@ -6,6 +6,7 @@ params:
   traindays: 7
   testdays: 1
   xreg: NULL
+  obs: FALSE
 title: '`r params$model` on full `r params$series`'
 author: 'Barbu Paul - Gheorghe'
 date: '`r Sys.time()`'
@@ -39,6 +40,8 @@ Model: **`r params$model`**.
 
 Transformation: **`r params$transformation`**.
 
+As observations: **`r params$obs`**.
+
 Train days: **`r params$traindays`**.
 
 Test days: **`r params$testdays`**.
@@ -51,7 +54,12 @@ The data has been previously cleaned, negative values were made 0.
 
 ```{r data, echo=FALSE, message=FALSE, warning=FALSE}
 fulldata <- datasets[[params$series]]$series
-totaldays <- round(length(fulldata)/frequency(fulldata))
+if(params$obs)
+{
+  totaldays <- length(fulldata)
+}else{
+  totaldays <- round(length(fulldata)/frequency(fulldata))
+}
 
 autoplot(fulldata, series="Full") +
   xlab("Observation [days]") +
@@ -72,18 +80,31 @@ Number of data points per day: **`r frequency(fulldata)`**
 ```{r get-forecast, message=FALSE, include=FALSE}
 tic('Forecast')
 
-fcast <- fullforecast(fulldata,
-                      params$transformation, 
-                      params$model, 
-                      params$traindays,
-                      params$testdays,
-                      params$xreg)
+fcast <- NULL
+
+if(params$obs)
+{
+  fcast <- fullforecast.obs(fulldata,
+                        params$transformation, 
+                        params$model, 
+                        params$traindays,
+                        params$testdays,
+                        params$xreg)
+}else{
+  fcast <- fullforecast(fulldata,
+                        params$transformation, 
+                        params$model, 
+                        params$traindays,
+                        params$testdays,
+                        params$xreg)
+}
 fcast.times <- toc()
 ```
 
-Time elapapsed for forecasting **`r totaldays - params$traindays`** days,
-initial training days are not taken into account,
-(representing **`r frequency(fulldata) * (totaldays - params$traindays)`** data points):
+Time elapapsed for forecasting
+**`r totaldays - params$traindays`**
+`r ifelse(params$obs, "data points", paste("days (representing", frequency(fulldata) * (totaldays - params$traindays), "data points)"))`,
+initial training data not taken into account:
 **`r fcast.times$toc - fcast.times$tic`** seconds
 (**`r (fcast.times$toc - fcast.times$tic)/60`** minutes).
 
