@@ -287,8 +287,6 @@ report.full(model = 'auto.arima(xreg=fourier(., K=5))',
 
 # ARIMA(1,0,0)(1,0,0) on 4:1 days and ARIMA(1, 0, 0)(1, 0, 0) with Fourier(k=5) on 7:1 ----
 
-# TODO:Fit the seasonality using fourier terms and the errors using the logic above
-
 best.fcast.2hrsPh3 <- NULL
 best.traindays <- 0
 best.testdays <- 0
@@ -416,3 +414,62 @@ report.full(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="ML", x
             testdays = 1,
             xreg = 'fourier(., h=h, K=1)',
             obs = TRUE)
+
+best.fcast.obs.2hrsPh3 <- NULL
+best.testobs <- 0
+trainobs <- 4*frequency(datasets[['2hrs ph3']]$series) #48
+
+for(testobs in 1:(frequency(datasets[['2hrs ph3']]$series) - 1)) # 1:11
+{
+  print(paste("Trying", trainobs, "train observations and", testobs, "test observations"))
+  current <- fullforecast.obs(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="ML")',
+                          dataset = datasets[['2hrs ph3']]$series,
+                          transformation = 'identity()',
+                          trainobs = trainobs,
+                          testobs = testobs,
+                          xreg=NULL)
+  
+  if(is.null(best.fcast.obs.2hrsPh3) || current$accuracy[[2]] < best.fcast.obs.2hrsPh3$accuracy[[2]])
+  {
+    best.fcast.obs.2hrsPh3 <- current
+    best.testobs <- testobs
+  }
+}
+
+report.full(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="ML")',
+            series = '2hrs ph3',
+            transformation = 'identity()',
+            traindays = trainobs,
+            testdays = best.testobs, # 1
+            obs = TRUE)
+
+
+best.fcast.obs.fourier.2hrsPh3 <- NULL
+best.fourier.testobs <- 0
+
+for(testobs in 1:(frequency(datasets[['2hrs ph3']]$series) - 1)) # 1:11
+{
+  print(paste("Trying", trainobs, "train observations and", testobs, "test observations"))
+  current <- fullforecast.obs(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), xreg=fourier(., K=1), method="ML")',
+                              dataset = datasets[['2hrs ph3']]$series,
+                              transformation = 'identity()',
+                              trainobs = trainobs,
+                              testobs = testobs,
+                              xreg = 'fourier(., h=h, K=1)')
+  
+  if(is.null(best.fcast.obs.fourier.2hrsPh3) || current$accuracy[[2]] < best.fcast.obs.fourier.2hrsPh3$accuracy[[2]])
+  {
+    best.fcast.obs.fourier.2hrsPh3 <- current
+    best.fourier.testobs <- testobs
+  }
+}
+
+report.full(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), xreg=fourier(., K=1), method="ML")',
+            series = '2hrs ph3',
+            transformation = 'identity()',
+            traindays = trainobs,
+            testdays = best.fourier.testobs, # 1
+            xreg = 'fourier(., h=h, K=1)',
+            obs = TRUE)
+
+# no better model was found this way (by using only several observations ---- 
