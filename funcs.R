@@ -159,10 +159,15 @@ fullforecast <- function(dataset, transformation, model, traindays, testdays, xr
   return(fcasts)
 }
 
-fullforecast.serial <- function(dataset, transformation, model, traindays, testdays, xreg)
+fullforecast.serial <- function(dataset, transformation, model, traindays, testdays, xreg, max.iterations = NULL)
 {
   startday <- 0
-  endday <- end(dataset)[1] + 1 - (traindays + testdays)
+  if(is.null(max.iterations))
+  {
+    endday <- end(dataset)[1] + 1 - (traindays + testdays)
+  }else{
+    endday <- max.iterations
+  }
   
   fcasts <- list()
   fcasts$points <- c()
