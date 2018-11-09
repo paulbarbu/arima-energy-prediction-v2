@@ -224,11 +224,12 @@ for(testobs in 1:(frequency(datasets[['1hrs ph3']]$series) - 1)) # 1:23
   }
 }
 
+#RMSE 336
 report.full(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS")',
             series = '1hrs ph3',
             transformation = 'identity()',
             traindays = trainobs,
-            testdays = best.testobs, # ?
+            testdays = best.testobs, # 1
             obs = TRUE)
 
 
@@ -252,10 +253,11 @@ for(testobs in 1:(frequency(datasets[['1hrs ph3']]$series) - 1)) # 1:11
   }
 }
 
+#RMSE 316
 report.full(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), xreg=fourier(., K=2), method="CSS")',
             series = '1hrs ph3',
             transformation = 'identity()',
             traindays = trainobs,
-            testdays = best.fourier.testobs, # ?
-            xreg = 'fourier(., h=h, K=1)',
+            testdays = best.fourier.testobs, # 1
+            xreg = 'fourier(., h=h, K=2)',
             obs = TRUE)

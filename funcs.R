@@ -337,3 +337,73 @@ fullforecast.obs <- function(dataset, transformation, model, trainobs, testobs, 
   
   return(fcasts)
 }
+
+
+fullforecast.serial.obs <- function(dataset, transformation, model, trainobs, testobs, xreg, max.iterations = NULL)
+{
+  startobs <- 0
+  
+  if(is.null(max.iterations))
+  {
+    endobs <- length(dataset) - (trainobs + testobs)
+  }else{
+    endobs <- max.iterations
+  }
+  
+  fcasts <- list()
+  fcasts$points <- c()
+  
+  for(currentobs in startobs:endobs)
+  {
+    print(paste("Current obs =", currentobs))
+    datachunk <- get_obs(dataset, currentobs, trainobs, testobs)
+    
+    eval(parse(text=paste('datachunk$train %>%',
+                          transformation))) -> datachunk$train.transformed
+    
+    h <- testobs
+    
+    # for naive, snaive and meanf models
+    # the model already returns the forecasts, no separate forecast step
+    # is needed
+    if(any(startsWith(model, c("naive()", "snaive()", "meanf()"))))
+    {
+      model <- sub("()", paste("(h=", h, ")", sep=""), model, fixed=TRUE)
+    } 
+    
+    eval(parse(text=paste('datachunk$train.transformed %>%', model))) -> fit
+    
+    fcast <- NULL
+    
+    # for naive, snaive and meanf models
+    # the model already returns the forecasts, no separate forecast step
+    # is needed
+    if(any(startsWith(model, c("naive(", "snaive(", "meanf("))))
+    {
+      chunk.fcast <- fit
+    } else
+    {
+      fourier.terms <- NULL
+      
+      if(!is.null(xreg))
+      {
+        eval(parse(text=paste('datachunk$test %>%', xreg))) -> fourier.terms
+      }
+      
+      fit %>% forecast(h=h, xreg=fourier.terms) -> chunk.fcast
+    }
+    
+    fcasts$points <- c(fcasts$points, chunk.fcast$mean)
+    
+    gc()
+  }
+  
+  gc()
+  
+  fcasts$points <- ts(fcasts$points, start=trainobs/frequency(dataset), frequency = frequency(dataset))
+  testpoints <- get_obs(dataset, trainobs, NULL, NULL)$train
+  
+  fcasts$accuracy <- accuracy(fcasts$points, testpoints)
+  
+  return(fcasts)
+}
