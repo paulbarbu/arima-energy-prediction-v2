@@ -189,6 +189,10 @@ fullforecast <- function(dataset, transformation, model, traindays, testdays, xr
   
   fcasts$accuracy <- accuracy(fcasts$points, testpoints)
   
+  fcasts$adjpoints <- fcasts$points
+  fcasts$adjpoints[fcasts$adjpoints < 0] <- 0
+  fcasts$adjaccuracy <- accuracy(fcasts$adjpoints, testpoints)
+  
   return(fcasts)
 }
 
@@ -256,6 +260,10 @@ fullforecast.serial <- function(dataset, transformation, model, traindays, testd
   testpoints <- get_days(dataset, traindays, NULL, NULL)$train
   
   fcasts$accuracy <- accuracy(fcasts$points, testpoints)
+  
+  fcasts$adjpoints <- fcasts$points
+  fcasts$adjpoints[fcasts$adjpoints < 0] <- 0
+  fcasts$adjaccuracy <- accuracy(fcasts$adjpoints, testpoints)
   
   return(fcasts)
 }
@@ -335,6 +343,10 @@ fullforecast.obs <- function(dataset, transformation, model, trainobs, testobs, 
   
   fcasts$accuracy <- accuracy(fcasts$points, testpoints)
   
+  fcasts$adjpoints <- fcasts$points
+  fcasts$adjpoints[fcasts$adjpoints < 0] <- 0
+  fcasts$adjaccuracy <- accuracy(fcasts$adjpoints, testpoints)
+  
   return(fcasts)
 }
 
@@ -404,6 +416,10 @@ fullforecast.serial.obs <- function(dataset, transformation, model, trainobs, te
   testpoints <- get_obs(dataset, trainobs, NULL, NULL)$train
   
   fcasts$accuracy <- accuracy(fcasts$points, testpoints)
+  
+  fcasts$adjpoints <- fcasts$points
+  fcasts$adjpoints[fcasts$adjpoints < 0] <- 0
+  fcasts$adjaccuracy <- accuracy(fcasts$adjpoints, testpoints)
   
   return(fcasts)
 }

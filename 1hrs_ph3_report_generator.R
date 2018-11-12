@@ -200,7 +200,14 @@ report.full(model = paste('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="
             testdays = best.fourier.testdays, # 1
             xreg = paste('fourier(., h=h, K=', best.k, ')'))
 
-#  best for 7:1, ARIMA(1,0,0)(1,0,0) with fourier k=2 RMSE=311----
+#  best for 7:1, ARIMA(1,0,0)(1,0,0) with fourier k=2, RMSE=311, MAE=178----
+
+report.full(model = paste('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS", xreg=fourier(., K=', 2, '))', sep=''),
+            series = '1hrs ph3',
+            transformation = 'identity()',
+            traindays = 7,
+            testdays = 1,
+            xreg = paste('fourier(., h=h, K=', 2, ')'))
 
 # observation based modelling ----
 best.fcast.obs.1hrsPh3 <- NULL
@@ -261,3 +268,19 @@ report.full(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), xreg=fourier(.
             testdays = best.fourier.testobs, # 1
             xreg = 'fourier(., h=h, K=2)',
             obs = TRUE)
+
+# other tries ----
+
+report.full(model = 'Arima(order=c(4, 1, 1), seasonal=c(2, 0, 0), method="CSS")',
+            series = '1hrs ph3',
+            transformation = 'identity()',
+            traindays = 7,
+            testdays = 1)
+
+report.full(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS", xreg=fourier(., K=2), include.mean=FALSE)',
+            series = '1hrs ph3',
+            transformation = 'identity()',
+            traindays = 7,
+            testdays = 1,
+            xreg = 'fourier(., h=h, K=2)')
+

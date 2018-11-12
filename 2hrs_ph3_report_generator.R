@@ -383,8 +383,14 @@ report.full(model = paste('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="
             xreg = paste('fourier(., h=h, K=', best.k, ')'))
 
 
-# Best model: ARIMA(1, 0, 0)(1, 0, 0) (K=1) RMSE 320----
+# Best model: ARIMA(1, 0, 0)(1, 0, 0) (K=1), 7:1, RMSE 320, MAE 183& ----
 
+report.full(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="ML", xreg=fourier(., K=1))',
+            series = '2hrs ph3',
+            transformation = 'identity()',
+            traindays = 7,
+            testdays = 1,
+            xreg = 'fourier(., h=h, K=1)')
 
 
 
@@ -473,3 +479,18 @@ report.full(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), xreg=fourier(.
             obs = TRUE)
 
 # no better model was found this way (by using only several observations ---- 
+
+
+# other tries ----
+report.full(model = 'Arima(order=c(2, 1, 1), seasonal=c(2, 0, 0))',
+            series = '2hrs ph3',
+            transformation = 'identity()',
+            traindays = 7,
+            testdays = 1)
+
+report.full(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="ML", xreg=fourier(., K=1), include.mean=FALSE)',
+            series = '2hrs ph3',
+            transformation = 'identity()',
+            traindays = 7,
+            testdays = 1,
+            xreg = 'fourier(., h=h, K=1)')

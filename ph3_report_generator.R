@@ -51,10 +51,11 @@ fullforecast.serial(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method
                     testdays = 1,
                     xreg = NULL)
 
-fullforecast.serial(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS")',
+
+fullforecast.serial.obs(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="ML")',
                     dataset = datasets[['ph3']]$series,
                     transformation = 'identity()',
-                    traindays = 2,
-                    testdays = 1,
+                    trainobs = 12, #frequency(datasets[['ph3']]$series),
+                    testobs = 1,
                     xreg = NULL,
                     max.iterations = 1)

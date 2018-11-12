@@ -76,7 +76,6 @@ Number of data points per day: **`r frequency(fulldata)`**
 
 # Forecast data
 
-## Forecasts plot against the data
 ```{r get-forecast, message=FALSE, include=FALSE}
 tic('Forecast')
 
@@ -108,7 +107,8 @@ initial training data not taken into account:
 **`r fcast.times$toc - fcast.times$tic`** seconds
 (**`r (fcast.times$toc - fcast.times$tic)/60`** minutes).
 
-```{r plot-forecast, echo=FALSE}
+## Forecasts (un-adjusted) plot against the data
+```{r plot-forecast-unadjusted, echo=FALSE}
 autoplot(fulldata, series="Original") +
   autolayer(fcast$points, series="Forecasts") +
   xlab("Observation [days]") +
@@ -117,9 +117,24 @@ autoplot(fulldata, series="Original") +
   guides(colour=guide_legend(title="Data series"))
 ```
 
-## Accuracy of the forecasts against the data
+## Accuracy of the un-adjusted forecasts against the data
 ```{r forecast-accuracy, echo=FALSE}
 knitr::kable(fcast$accuracy)
+```
+
+## Forecasts (adjusted) plot against the data
+```{r plot-forecast-adjusted, echo=FALSE}
+autoplot(fulldata, series="Original") +
+  autolayer(fcast$adjpoints, series="Forecasts") +
+  xlab("Observation [days]") +
+  ylab("Energy [Watts]") +
+  ggtitle("Original data and forecasts") + 
+  guides(colour=guide_legend(title="Data series"))
+```
+
+## Accuracy of the adjusted forecasts against the data
+```{r forecast-adjaccuracy, echo=FALSE}
+knitr::kable(fcast$adjaccuracy)
 ```
 
 # Future work
