@@ -7,6 +7,7 @@ params:
   testdays: 1
   xreg: NULL
   obs: FALSE
+  serial: FALSE
 title: '`r params$model` on full `r params$series`'
 author: 'Barbu Paul - Gheorghe'
 date: '`r Sys.time()`'
@@ -48,6 +49,8 @@ Test days: **`r params$testdays`**.
 
 xreg: **`r params$xreg`**.
 
+Parallel processing: **`r !params$serial`**.
+
 # Original data
 
 The data has been previously cleaned, negative values were made 0.
@@ -79,24 +82,31 @@ Number of data points per day: **`r frequency(fulldata)`**
 ```{r get-forecast, message=FALSE, include=FALSE}
 tic('Forecast')
 
-fcast <- NULL
+fcastfunc <- NULL
 
 if(params$obs)
 {
-  fcast <- fullforecast.obs(fulldata,
-                        params$transformation, 
-                        params$model, 
-                        params$traindays,
-                        params$testdays,
-                        params$xreg)
+  if(params$serial)
+  {
+    fcastfunc <- fullforecast.serial.obs
+  }else{
+    fcastfunc <- fullforecast.obs
+  }
 }else{
-  fcast <- fullforecast(fulldata,
-                        params$transformation, 
-                        params$model, 
-                        params$traindays,
-                        params$testdays,
-                        params$xreg)
+  if(params$serial)
+  {
+    fcastfunc <- fullforecast.serial
+  }else{
+    fcastfunc <- fullforecast  
+  }
 }
+
+fcast <- fcastfunc(fulldata,
+                  params$transformation, 
+                  params$model, 
+                  params$traindays,
+                  params$testdays,
+                  params$xreg)
 fcast.times <- toc()
 ```
 

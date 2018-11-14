@@ -31,12 +31,6 @@ report.full(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), xreg=fourier(.
             xreg = 'fourier(., K=4, h=h)')
 
 
-report.full(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0))',
-            series = 'ph3',
-            transformation = 'identity()',
-            traindays = 7,
-            testdays = 1)
-
 #$accuracy
 #             ME     RMSE      MAE    MPE MAPE      ACF1 Theil's U
 #Test set 5.270776 346.4092 210.4319 -Inf  Inf 0.7271158         0
@@ -49,6 +43,7 @@ fullforecast.serial(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method
                     xreg = NULL)
 
 
+# still very high memory usage
 fullforecast.serial.obs(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="ML")',
                     dataset = datasets[['ph3']]$series,
                     transformation = 'identity()',
@@ -56,3 +51,30 @@ fullforecast.serial.obs(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), me
                     testobs = 1,
                     xreg = NULL,
                     max.iterations = 1)
+
+#simple
+report.full(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS")',
+            series = 'ph3',
+            transformation = 'identity()',
+            traindays = 7,
+            testdays = 1,
+            serial = TRUE)
+
+# inspiration from 1hrs series
+report.full(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS", xreg=fourier(., K=2))',
+            series = 'ph3',
+            transformation = 'identity()',
+            traindays = 7,
+            testdays = 1,
+            xreg = 'fourier(., h=h, K=2)',
+            serial = TRUE)
+
+# inspiration from 2hrs series
+report.full(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS", xreg=fourier(., K=1))',
+            series = 'ph3',
+            transformation = 'identity()',
+            traindays = 7,
+            testdays = 1,
+            xreg = 'fourier(., h=h, K=1)',
+            serial = TRUE)
+
