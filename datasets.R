@@ -1,6 +1,7 @@
 datasets <- list(
   '2hrs ph3' = list(
     series = ts(read.csv(file = '../energyarima/benchmarks/2hrs-ph3.txt'), frequency=(24*60)/120, start=0),
+    #series = msts(read.csv(file = '../energyarima/benchmarks/2hrs-ph3.txt'), seasonal.periods=c((24*60)/120, (24*60*7)/120), start=0),
     time_span = 120 #minutes
   ),
   '2hrs ph2' = list(

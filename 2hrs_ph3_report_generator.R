@@ -492,3 +492,15 @@ report.full(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="ML", x
             traindays = 7,
             testdays = 1,
             xreg = 'fourier(., h=h, K=1)')
+
+
+
+
+#series = msts(read.csv(file = '../energyarima/benchmarks/2hrs-ph3.txt'), seasonal.periods=c((24*60)/120, (24*60*7)/120), start=0),
+# report.full(
+#             model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS", xreg=fourier(., K=c(1, 1)))',
+#             series = '2hrs ph3',
+#             transformation = 'identity()',
+#             traindays = 7,
+#             testdays = 1,
+#             xreg = 'fourier(., h=h, K=c(1, 1))')

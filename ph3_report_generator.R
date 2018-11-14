@@ -1,6 +1,3 @@
-library(rmarkdown)
-library(fs)
-
 source('funcs.R')
 
 # benchmark models  ----
