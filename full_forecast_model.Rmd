@@ -107,6 +107,29 @@ initial training data not taken into account:
 **`r fcast.times$toc - fcast.times$tic`** seconds
 (**`r (fcast.times$toc - fcast.times$tic)/60`** minutes).
 
+`r current.rendered.filename.withext <- get(env = parent.frame(n = 8), 'output_file')`
+
+```{r save-forecasts, echo=FALSE}
+#get(env = parent.frame(n = 8), 'output_dir')
+# current.rendered.filename.withext <- get(env = parent.frame(n = 18), 'output_file')
+ current.rendered.filename <- tools::file_path_sans_ext(current.rendered.filename.withext)
+ 
+ save(fcast, file=paste(
+   current.rendered.filename,
+   ".RData", 
+   sep=""))
+ 
+ write.csv(fcast$points, file=paste(
+   current.rendered.filename, 
+   ".points.csv", 
+   sep=""))
+ 
+ write.csv(fcast$adjpoints, file=paste(
+   current.rendered.filename, 
+   ".adjpoints.csv", 
+   sep=""))
+```
+
 ## Forecasts (un-adjusted) plot against the data
 ```{r plot-forecast-unadjusted, echo=FALSE}
 autoplot(fulldata, series="Original") +

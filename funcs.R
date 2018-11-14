@@ -90,11 +90,17 @@ report <- function(...)
   print(sprintf('Done: %s/%s', dirname, filename))
 }
 
-report.full <- function(...)
+report.full <- function(output_format='html_document', ...)
 {
   report.params <- list(...)
   
-  fmt <- paste('full_', paste(rep('%s.', length(report.params)), collapse=''), 'html', sep='')
+  extension <- "html"
+  if(output_format == "pdf_document")
+  {
+    extension <- "pdf"
+  }
+  
+  fmt <- paste('full_', paste(rep('%s.', length(report.params)), collapse=''), extension, sep='')
   filename <- path_sanitize(do.call(sprintf, c(fmt, report.params)))
   
   dirname <- gsub(' ', '_', report.params$series)
@@ -106,6 +112,7 @@ report.full <- function(...)
          params = report.params,
          output_file = filename,
          output_dir = dirname,
+         output_format = output_format,
          quiet = TRUE)  
   
   print(sprintf('Done: %s/%s', dirname, filename))

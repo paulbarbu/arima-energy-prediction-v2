@@ -202,7 +202,8 @@ report.full(model = paste('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="
 
 #  best for 7:1, ARIMA(1,0,0)(1,0,0) with fourier k=2, RMSE=311, MAE=178----
 
-report.full(model = paste('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS", xreg=fourier(., K=', 2, '))', sep=''),
+report.full(output_format = "pdf_document",
+            model = paste('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS", xreg=fourier(., K=', 2, '))', sep=''),
             series = '1hrs ph3',
             transformation = 'identity()',
             traindays = 7,
