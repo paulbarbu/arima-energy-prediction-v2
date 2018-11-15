@@ -504,14 +504,6 @@ report.full(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="ML", x
             testdays = 1,
             xreg = 'fourier(., h=h, K=1)')
 
- report.full(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS", xreg=fourier(., K=1))',
-             series = '2hrs ph3',
-             transformation = 'identity()',
-             traindays = 48,
-             testdays = 1,
-             xreg = 'fourier(., h=h, K=1)',
-             obs=TRUE)
-
 
 # other tries ----
 report.full(model = 'Arima(order=c(2, 1, 1), seasonal=c(2, 0, 0))',
@@ -538,3 +530,33 @@ report.full(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="ML", x
 #             traindays = 7,
 #             testdays = 1,
 #             xreg = 'fourier(., h=h, K=c(1, 1))')
+
+# if predicting one single point ahead it works, otherwise I produce too many fcast points
+fullforecast.obs(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS", xreg=fourier(., K=1))',
+            dataset = datasets[['2hrs ph3']]$series,
+            transformation = 'identity()',
+            trainobs = 48,
+            testobs = 12,
+            xreg = 'fourier(., h=h, K=1)')
+
+fullforecast.serial.obs(model = 'Arima(order=c(1, 0, 0), method="CSS")',
+                 dataset = head(datasets[['2hrs ph3']]$series, 100),
+                 transformation = 'identity()',
+                 trainobs = 48,
+                 testobs = 12,
+                 xreg = NULL)
+
+fullforecast(model = 'Arima(order=c(1, 0, 0), method="CSS")',
+                        dataset = head(datasets[['2hrs ph3']]$series, 1000),
+                        transformation = 'identity()',
+                        traindays = 7,
+                        testdays = 2,
+                        xreg = NULL)
+
+report.full(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS", xreg=fourier(., K=1))',
+                         series = '2hrs ph3',
+                         transformation = 'identity()',
+                         traindays = 48,
+                         testdays = 12,
+                         xreg = 'fourier(., h=h, K=1)',
+                         obs=TRUE)

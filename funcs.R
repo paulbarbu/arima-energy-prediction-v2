@@ -138,7 +138,7 @@ fullforecast <- function(dataset, transformation, model, traindays, testdays, xr
   
   gc()
   
-  fcasts$points <- foreach(currentday = startday:endday,
+  fcasts$points <- foreach(currentday = seq(startday, endday, testdays),
                            .export = c("get_days"),
                            .packages = c("forecast"),
                            .combine = c, 
@@ -216,7 +216,7 @@ fullforecast.serial <- function(dataset, transformation, model, traindays, testd
   fcasts <- list()
   fcasts$points <- c()
   
-  for(currentday in startday:endday)
+  for(currentday in seq(startday, endday, testdays))
   {
     print(paste("Current day =", currentday))
     datachunk <- get_days(dataset, currentday, traindays, testdays)
@@ -292,7 +292,7 @@ fullforecast.obs <- function(dataset, transformation, model, trainobs, testobs, 
   
   gc()
   
-  fcasts$points <- foreach(currentobs = startobs:endobs,
+  fcasts$points <- foreach(currentobs = seq(startobs, endobs, testobs),
                            .export = c("get_obs"),
                            .packages = c("forecast"),
                            .combine = c, 
@@ -372,7 +372,7 @@ fullforecast.serial.obs <- function(dataset, transformation, model, trainobs, te
   fcasts <- list()
   fcasts$points <- c()
   
-  for(currentobs in startobs:endobs)
+  for(currentobs in seq(startobs, endobs, testobs))
   {
     print(paste("Current obs =", currentobs))
     datachunk <- get_obs(dataset, currentobs, trainobs, testobs)
