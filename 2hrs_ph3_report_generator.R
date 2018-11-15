@@ -393,8 +393,8 @@ report.full(model = paste('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="
             xreg = paste('fourier(., h=h, K=', best.k, ')'))
 
 
-# Best model: ARIMA(1, 0, 0)(1, 0, 0) (K=1), 7:1, RMSE 320, MAE 183 || with tsclean RMSE 149, MAE 107 ----
-
+# Best model: ARIMA(1, 0, 0)(1, 0, 0) (K=1), 7:1, RMSE 320, MAE 183 || with tsclean RMSE 330, MAE 169 ----
+# RMSE has gone up since it applies bigger penalty to the bigger errors (there are bigger errors since tsclean "smoothes" the data hence the outliers will give even bigger errors)
 report.full(output_format = 'pdf_document',
             model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="ML", xreg=fourier(., K=1))',
             series = '2hrs ph3',
