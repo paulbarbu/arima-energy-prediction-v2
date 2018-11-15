@@ -64,11 +64,30 @@ if(params$obs)
   totaldays <- round(length(fulldata)/frequency(fulldata))
 }
 
-autoplot(fulldata, series="Full") +
+fulldata.transformed <- NULL
+use_transformation <- !is.null(params$transformation) && params$transformation != 'identity()'
+if(use_transformation)
+{
+  eval(parse(text=paste('fulldata %>%',
+                        params$transformation))) -> fulldata.transformed
+}else{
+  fulldata.transformed <- fulldata
+}
+```
+
+```{r plot-data, echo=FALSE, message=FALSE, warning=FALSE}
+plt <- autoplot(fulldata, series="Original") +
   xlab("Observation [days]") +
   ylab("Energy [Watts]") +
   ggtitle("Original data") + 
   guides(colour=guide_legend(title="Data series"))
+
+if(use_transformation)
+{
+  plt + autolayer(fulldata.transformed, series="Transformed")
+}else{
+  plt
+}
 ```
 
 Total data points: **`r length(fulldata)`** representing
@@ -142,7 +161,9 @@ initial training data not taken into account:
 
 ## Forecasts (un-adjusted) plot against the data
 ```{r plot-forecast-unadjusted, echo=FALSE}
-autoplot(fulldata, series="Original") +
+
+autoplot(fulldata.transformed,
+         series=ifelse(use_transformation, "Transformed", "Original")) +
   autolayer(fcast$points, series="Forecasts") +
   xlab("Observation [days]") +
   ylab("Energy [Watts]") +
@@ -157,7 +178,8 @@ knitr::kable(fcast$accuracy)
 
 ## Forecasts (adjusted) plot against the data
 ```{r plot-forecast-adjusted, echo=FALSE}
-autoplot(fulldata, series="Original") +
+autoplot(fulldata.transformed,
+         series=ifelse(use_transformation, "Transformed", "Original")) +
   autolayer(fcast$adjpoints, series="Forecasts") +
   xlab("Observation [days]") +
   ylab("Energy [Watts]") +

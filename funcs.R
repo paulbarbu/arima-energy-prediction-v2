@@ -192,7 +192,12 @@ fullforecast <- function(dataset, transformation, model, traindays, testdays, xr
   stopCluster(cl)
   
   fcasts$points <- ts(fcasts$points, start=traindays, frequency = frequency(dataset))
+  eval(parse(text=paste('fcasts$points %>%',
+                        transformation))) -> fcasts$points
+  
   testpoints <- get_days(dataset, traindays, NULL, NULL)$train
+  eval(parse(text=paste('testpoints %>%',
+                        transformation))) -> testpoints
   
   fcasts$accuracy <- accuracy(fcasts$points, testpoints)
   
@@ -264,7 +269,13 @@ fullforecast.serial <- function(dataset, transformation, model, traindays, testd
   gc()
   
   fcasts$points <- ts(fcasts$points, start=traindays, frequency = frequency(dataset))
+  eval(parse(text=paste('fcasts$points %>%',
+                        transformation))) -> fcasts$points
+  
   testpoints <- get_days(dataset, traindays, NULL, NULL)$train
+  eval(parse(text=paste('testpoints %>%',
+                        transformation))) -> testpoints
+  
   
   fcasts$accuracy <- accuracy(fcasts$points, testpoints)
   
@@ -346,8 +357,13 @@ fullforecast.obs <- function(dataset, transformation, model, trainobs, testobs, 
   stopCluster(cl)
   
   fcasts$points <- ts(fcasts$points, start=trainobs/frequency(dataset), frequency = frequency(dataset))
-  testpoints <- get_obs(dataset, trainobs, NULL, NULL)$train
+  eval(parse(text=paste('fcasts$points %>%',
+                        transformation))) -> fcasts$points
   
+  testpoints <- get_obs(dataset, trainobs, NULL, NULL)$train
+  eval(parse(text=paste('testpoints %>%',
+                        transformation))) -> testpoints
+
   fcasts$accuracy <- accuracy(fcasts$points, testpoints)
   
   fcasts$adjpoints <- fcasts$points
@@ -420,7 +436,12 @@ fullforecast.serial.obs <- function(dataset, transformation, model, trainobs, te
   gc()
   
   fcasts$points <- ts(fcasts$points, start=trainobs/frequency(dataset), frequency = frequency(dataset))
+  eval(parse(text=paste('fcasts$points %>%',
+                        transformation))) -> fcasts$points
+  
   testpoints <- get_obs(dataset, trainobs, NULL, NULL)$train
+  eval(parse(text=paste('testpoints %>%',
+                        transformation))) -> testpoints
   
   fcasts$accuracy <- accuracy(fcasts$points, testpoints)
   
