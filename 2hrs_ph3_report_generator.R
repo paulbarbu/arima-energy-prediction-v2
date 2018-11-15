@@ -262,7 +262,7 @@ report(model = 'auto.arima()',
        traindays = 7,
        testdays = 1)
 
-# 2hrs ph3 full - apply the best models so far on the full data----
+# 2hrs ph3 full - apply the best models so far on the full data ----
 report.full(model = 'auto.arima()',
        series = '2hrs ph3',
        transformation = 'identity()',
@@ -295,7 +295,7 @@ report.full(model = 'auto.arima(xreg=fourier(., K=5))',
             xreg='fourier(., K=5, h=h)')
 
 
-# ARIMA(1,0,0)(1,0,0) on 4:1 days and ARIMA(1, 0, 0)(1, 0, 0) with Fourier(k=5) on 7:1 ----
+#  Find the best train:test days ratio for ARIMA(1,0,0)(1,0,0) ----
 
 best.fcast.2hrsPh3 <- NULL
 best.traindays <- 0
@@ -328,6 +328,7 @@ report.full(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="ML")',
             traindays = best.traindays, # 4
             testdays = best.testdays) # 1
 
+#  Find the best train:test days ratio for ARIMA(1,0,0)(1,0,0) K=5----
 best.fcast.fourier.2hrsPh3 <- NULL
 best.fourier.traindays <- 0
 best.fourier.testdays <- 0
@@ -358,7 +359,7 @@ report.full(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="ML", x
             series = '2hrs ph3',
             transformation = 'identity()',
             traindays = best.fourier.traindays, # 7
-            testdays = best.fourier.testdays, # 1
+            testdays = best.fourier.testdays, # 3
             xreg='fourier(., K=5, h=h)')
 
 # Find best K for the above model ARIMA(1,0,0)(1,0,0) ----
@@ -375,7 +376,7 @@ for(k in 1:(frequency(datasets[['2hrs ph3']]$series)/2))
                           dataset = datasets[['2hrs ph3']]$series,
                           transformation = 'identity()',
                           traindays = best.fourier.traindays, # 7
-                          testdays = best.fourier.testdays, # 1
+                          testdays = best.fourier.testdays, # 3
                           xreg=xreg)
   
   if(is.null(best.fcast.k.2hrsPh3) || current$accuracy[[2]] < best.fcast.k.2hrsPh3$accuracy[[2]])
@@ -389,27 +390,27 @@ report.full(model = paste('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="
             series = '2hrs ph3',
             transformation = 'identity()',
             traindays = best.fourier.traindays, # 7
-            testdays = best.fourier.testdays, # 1
-            xreg = paste('fourier(., h=h, K=', best.k, ')'))
+            testdays = best.fourier.testdays, # 3
+            xreg = paste('fourier(., h=h, K=', best.k, ')')) #2
 
 
-# Best model: ARIMA(1, 0, 0)(1, 0, 0) (K=1), 7:1, RMSE 320, MAE 183 || with tsclean RMSE 330, MAE 169 ----
+# Best model: ARIMA(1, 0, 0)(1, 0, 0) (K=2), 7:3, RMSE 318, MAE 182 || with tsclean RMSE 330, MAE 169 ----
 # RMSE has gone up since it applies bigger penalty to the bigger errors (there are bigger errors since tsclean "smoothes" the data hence the outliers will give even bigger errors)
 report.full(output_format = 'pdf_document',
-            model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="ML", xreg=fourier(., K=1))',
+            model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="ML", xreg=fourier(., K=2))',
             series = '2hrs ph3',
             transformation = 'identity()',
             traindays = 7,
-            testdays = 1,
-            xreg = 'fourier(., h=h, K=1)')
+            testdays = 3,
+            xreg = 'fourier(., h=h, K=2)')
 
 report.full(output_format = 'pdf_document',
-            model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="ML", xreg=fourier(., K=1))',
+            model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="ML", xreg=fourier(., K=2))',
             series = '2hrs ph3',
             transformation = 'tsclean()',
             traindays = 7,
-            testdays = 1,
-            xreg = 'fourier(., h=h, K=1)')
+            testdays = 3,
+            xreg = 'fourier(., h=h, K=2)')
 
 # observation based modelling ----
 report(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="ML")',

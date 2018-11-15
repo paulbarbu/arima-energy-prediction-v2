@@ -166,10 +166,10 @@ report.full(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), xreg=fourier(.
             series = '1hrs ph3',
             transformation = 'identity()',
             traindays = best.fourier.traindays, # 7
-            testdays = best.fourier.testdays, # 1
+            testdays = best.fourier.testdays, # 2
             xreg='fourier(., K=4, h=h)')
 
-# find the best k for 7:1, ARIMA(1,0,0)(1,0,0) with fourier ----
+# find the best k for 7:2, ARIMA(1,0,0)(1,0,0) with fourier ----
 
 best.fcast.k.1hrsPh3 <- NULL
 best.k <- 0
@@ -183,7 +183,7 @@ for(k in 1:(frequency(datasets[['1hrs ph3']]$series)/2))
                           dataset = datasets[['1hrs ph3']]$series,
                           transformation = 'identity()',
                           traindays = best.fourier.traindays, # 7
-                          testdays = best.fourier.testdays, # 1
+                          testdays = best.fourier.testdays, # 2
                           xreg=xreg)
   
   if(is.null(best.fcast.k.1hrsPh3) || current$accuracy[[2]] < best.fcast.k.1hrsPh3$accuracy[[2]])
@@ -197,25 +197,25 @@ report.full(model = paste('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="
             series = '1hrs ph3',
             transformation = 'identity()',
             traindays = best.fourier.traindays, # 7
-            testdays = best.fourier.testdays, # 1
+            testdays = best.fourier.testdays, # 2
             xreg = paste('fourier(., h=h, K=', best.k, ')'))
 
-#  best for 7:1, ARIMA(1,0,0)(1,0,0) with fourier k=2, RMSE=311, MAE=178 || with tsclean RMSE= 318, MAE=166 ----
+#  best for 7:2, ARIMA(1,0,0)(1,0,0) with fourier k=2, RMSE=311, MAE=179 || with tsclean RMSE= 320, MAE=168 ----
 
 report.full(output_format = "pdf_document",
-            model = paste('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS", xreg=fourier(., K=', 2, '))', sep=''),
+            model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS", xreg=fourier(., K=2))',
             series = '1hrs ph3',
             transformation = 'identity()',
             traindays = 7,
-            testdays = 1,
-            xreg = paste('fourier(., h=h, K=', 2, ')'))
+            testdays = 2,
+            xreg = 'fourier(., h=h, K=2)')
 
 report.full(output_format = "pdf_document",
             model = paste('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS", xreg=fourier(., K=', 2, '))', sep=''),
             series = '1hrs ph3',
             transformation = 'tsclean()',
             traindays = 7,
-            testdays = 1,
+            testdays = 2,
             xreg = paste('fourier(., h=h, K=', 2, ')'))
 
 
