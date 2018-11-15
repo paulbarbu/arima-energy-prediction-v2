@@ -302,16 +302,22 @@ knitr::kable(accuracy(fcast, data$test))
 ```{r fit-forecast-plot, echo=FALSE}
 clrs <- c("blueviolet", "blue", "darkgoldenrod4", "red")
 
-autoplot(fcast) +
+plt <- autoplot(fcast) +
   autolayer(fcast$mean, series="Forecast") +
   autolayer(fitted(fit), series='Fitted') + 
-  autolayer(data$train, series = 'Train') +
   autolayer(data$test, series='Test') +
   xlab("Observation [days]") +
   ylab("Energy [Watts]") +
   guides(colour=guide_legend(title="Data series"), 
          fill=guide_legend(title="Prediction interval")) +
   scale_color_manual(values=clrs)
+
+if(use_transformation)
+{
+  plt + autolayer(data$train.transformed, series = 'Train Transformed') 
+}else{
+  plt + autolayer(data$train, series = 'Train') 
+}
 ```
 
 Please note that the negative prediction intervals are due to the way these are

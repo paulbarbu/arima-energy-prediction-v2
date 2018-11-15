@@ -43,6 +43,16 @@ report(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0))',
        traindays = 7,
        testdays = 3)
 
+# Some outlier present, try to ignore it by tsclean
+report(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0))',
+       series = '2hrs ph3',
+       transformation = 'tsclean()',
+       diffs = 'identity()',
+       sdiffs = 'identity()',
+       startday = -10,
+       traindays = 7,
+       testdays = 3)
+
 # Try with a transformation, avoid -Inf values
 report(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0))',
        series = '2hrs ph3',
@@ -496,7 +506,7 @@ report.full(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="ML", x
 
  report.full(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS", xreg=fourier(., K=1))',
              series = '2hrs ph3',
-             transformation = 'tsclean()',
+             transformation = 'identity()',
              traindays = 48,
              testdays = 1,
              xreg = 'fourier(., h=h, K=1)',
