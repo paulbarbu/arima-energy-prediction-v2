@@ -3,6 +3,7 @@ library(foreach)
 library(doParallel)
 library(fs)
 library(rmarkdown)
+library(openssl)
 
 source('datasets.R')
 
@@ -70,24 +71,58 @@ get_obs <- function(dataset, startobs, trainobs = 7, testobs=3)
   return(days)
 }
 
+get6thDayDummies <- function(len, numObsPerDay)
+{
+  dummies <- NULL
+  oneWeek <- c(rep(0, 5 * numObsPerDay), rep(1, numObsPerDay), rep(0, numObsPerDay))
+  
+  if(len < length((oneWeek)))
+  {
+    dummies <- head(oneWeek, len)
+  }else{
+    upRoundedWeeks <- rep(oneWeek, (len/length(oneWeek))+1)
+    dummies <- head(upRoundedWeeks, len)
+  }
+  
+  return(dummies)
+}
+
+generateDirAndFilename <- function(report.params, extension, prepend='')
+{
+  fmt <- paste0(prepend, paste0(rep('%s.', length(report.params)), collapse=''), extension)
+  filename.unsanitized <- do.call(sprintf, c(fmt, report.params))
+  filename <- path_sanitize(filename.unsanitized)
+  dirname <- gsub(' ', '_', report.params$series)
+  
+  max.filename.length <- 100
+  if(nchar(filename) > max.filename.length)
+  {
+    filename.md5 <- md5(filename)
+    f <- file(paste0(paste0(dirname, '/', filename.md5, '.txt')))
+    writeLines(filename.unsanitized, f)
+    close(f)
+    
+    filename <- paste0(strtrim(filename, max.filename.length), '--', filename.md5, '.', extension)
+  }
+  
+  return(list(dirname=dirname, filename=filename))
+}
+
 report <- function(...)
 {
   report.params <- list(...)
   
-  fmt <- paste(paste(rep('%s.', length(report.params)), collapse=''), 'html', sep='')
-  filename <- path_sanitize(do.call(sprintf, c(fmt, report.params)))
+  names <- generateDirAndFilename(report.params, 'html')
   
-  dirname <- gsub(' ', '_', report.params$series)
-  
-  print(sprintf('Generating report file: %s/%s', dirname, filename))
+  print(sprintf('Generating report file: %s/%s', names$dirname, names$filename))
   
   render("arima_model.Rmd",
          params = report.params,
-         output_file = filename,
-         output_dir = dirname,
+         output_file = names$filename,
+         output_dir = names$dirname,
          quiet = TRUE)  
   
-  print(sprintf('Done: %s/%s', dirname, filename))
+  print(sprintf('Done: %s/%s', names$dirname, names$filename))
 }
 
 report.full <- function(output_format='html_document', ...)
@@ -100,22 +135,19 @@ report.full <- function(output_format='html_document', ...)
     extension <- "pdf"
   }
   
-  fmt <- paste('full_', paste(rep('%s.', length(report.params)), collapse=''), extension, sep='')
-  filename <- path_sanitize(do.call(sprintf, c(fmt, report.params)))
-  
-  dirname <- gsub(' ', '_', report.params$series)
-  
-  print(sprintf('Generating full data report file: %s/%s', dirname, filename))
+  names <- generateDirAndFilename(report.params, extension, prepend='full_')
+ 
+  print(sprintf('Generating full data report file: %s/%s', names$dirname, names$filename))
   
   gc()
   render("full_forecast_model.Rmd",
          params = report.params,
-         output_file = filename,
-         output_dir = dirname,
+         output_file = names$filename,
+         output_dir = names$dirname,
          output_format = output_format,
          quiet = TRUE)  
   
-  print(sprintf('Done: %s/%s', dirname, filename))
+  print(sprintf('Done: %s/%s', names$dirname, names$filename))
   gc()
 }
 
@@ -139,7 +171,7 @@ fullforecast <- function(dataset, transformation, model, traindays, testdays, xr
   gc()
   
   fcasts$points <- foreach(currentday = seq(startday, endday, testdays),
-                           .export = c("get_days"),
+                           .export = c("get_days", "get6thDayDummies"),
                            .packages = c("forecast"),
                            .combine = c, 
                            .verbose = TRUE) %dopar%
@@ -430,3 +462,4 @@ fullforecast.serial.obs <- function(dataset, transformation, model, trainobs, te
   
   return(fcasts)
 }
+

@@ -395,7 +395,7 @@ report.full(model = paste('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="
 
 
 # Best model: ARIMA(1, 0, 0)(1, 0, 0) (K=2), 7:3, RMSE 318, MAE 182 || with tsclean RMSE 330, MAE 169 ----
-# RMSE has gone up since it applies bigger penalty to the bigger errors (there are bigger errors since tsclean "smoothes" the data hence the outliers will give even bigger errors)
+# For tsclean() RMSE has gone up since it applies bigger penalty to the bigger errors (there are bigger errors since tsclean "smoothes" the data hence the outliers will give even bigger errors)
 report.full(output_format = 'pdf_document',
             model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="ML", xreg=fourier(., K=2))',
             series = '2hrs ph3',
@@ -505,6 +505,41 @@ report.full(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="ML", x
             testdays = 3,
             xreg = 'fourier(., h=h, K=2)')
 
+# dummies on 6th day - 6th day is has an "outlier" ----
+
+x.fcast <- quote(
+  {cbind(
+    dummies=get6thDayDummies(h, frequency(.)),
+    fourier(., h=h, K=2)
+  )}
+)
+
+x.fit <- quote(
+  {cbind(
+    dummies=get6thDayDummies(length(.), frequency(.)),
+    fourier(., K=2)
+  )}
+)
+
+report(model = paste0('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="ML", xreg=', paste0(deparse(x.fit), collapse='') ,')'),
+            series = '2hrs ph3',
+            transformation = 'identity()',
+            traindays = 7,
+            testdays = 3,
+            xreg = paste0(deparse(x.fcast), collapse=''))
+
+report.full(model = paste0('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS", xreg=', paste0(deparse(x.fit), collapse='') ,')'),
+            series = '2hrs ph3',
+            transformation = 'identity()',
+            traindays = 7,
+            testdays = 3,
+            xreg = paste0(deparse(x.fcast), collapse=''))
+
+
+(datasets[['2hrs ph3']]$series %>% 
+{eval(x)} ->
+    external.regressors)
+plot(external.regressors)
 
 # other tries ----
 report.full(model = 'Arima(order=c(2, 1, 1), seasonal=c(2, 0, 0))',

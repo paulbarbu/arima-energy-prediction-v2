@@ -1,7 +1,6 @@
 source('funcs.R')
 
 # benchmark models  ----
-
 report.full(model = 'snaive()',
             series = 'ph3',
             transformation = 'identity()',

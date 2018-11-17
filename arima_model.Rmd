@@ -215,7 +215,6 @@ data$train.transformed.sdiffed %>%
 ```{r model-fitting, include=FALSE}
 tic("Model fitting")
 
-#last_week %>% auto.arima(xreg=fourier(last_week, K=2), seasonal=F) -> fit
 eval(parse(text=paste('data$train.transformed %>%', params$model))) -> fit
 
 times <- toc()
