@@ -430,12 +430,12 @@ report.full(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS")'
             testdays = 1,
             obs=TRUE)
 
-report.full(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="ML", xreg=fourier(., K=1))',
+report.full(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS", xreg=fourier(., K=2))',
             series = '2hrs ph3',
             transformation = 'identity()',
             traindays = 48,
-            testdays = 1,
-            xreg = 'fourier(., h=h, K=1)',
+            testdays = 2,
+            xreg = 'fourier(., h=h, K=2)',
             obs = TRUE)
 
 best.fcast.obs.2hrsPh3 <- NULL
@@ -463,22 +463,22 @@ report.full(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="ML")',
             series = '2hrs ph3',
             transformation = 'identity()',
             traindays = trainobs,
-            testdays = best.testobs, # 1
+            testdays = best.testobs, # 9
             obs = TRUE)
 
 
 best.fcast.obs.fourier.2hrsPh3 <- NULL
 best.fourier.testobs <- 0
 
-for(testobs in 1:(frequency(datasets[['2hrs ph3']]$series) - 1)) # 1:11
+for(testobs in 2:(frequency(datasets[['2hrs ph3']]$series) - 1)) # 2:11
 {
   print(paste("Trying", trainobs, "train observations and", testobs, "test observations"))
-  current <- fullforecast.obs(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), xreg=fourier(., K=1), method="ML")',
+  current <- fullforecast.obs(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), xreg=fourier(., K=2), method="CSS")',
                               dataset = datasets[['2hrs ph3']]$series,
                               transformation = 'identity()',
                               trainobs = trainobs,
                               testobs = testobs,
-                              xreg = 'fourier(., h=h, K=1)')
+                              xreg = 'fourier(., h=h, K=2)')
   
   if(is.null(best.fcast.obs.fourier.2hrsPh3) || current$accuracy[[2]] < best.fcast.obs.fourier.2hrsPh3$accuracy[[2]])
   {
@@ -487,23 +487,23 @@ for(testobs in 1:(frequency(datasets[['2hrs ph3']]$series) - 1)) # 1:11
   }
 }
 
-report.full(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), xreg=fourier(., K=1), method="ML")',
+report.full(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), xreg=fourier(., K=2), method="ML")',
             series = '2hrs ph3',
             transformation = 'identity()',
             traindays = trainobs,
-            testdays = best.fourier.testobs, # 1
-            xreg = 'fourier(., h=h, K=1)',
+            testdays = best.fourier.testobs, # 11
+            xreg = 'fourier(., h=h, K=2)',
             obs = TRUE)
 
 # no better model was found this way (by using only several observations ---- 
 
 # tsclean on the best model ----
-report.full(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="ML", xreg=fourier(., K=1))',
+report.full(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="ML", xreg=fourier(., K=2))',
             series = '2hrs ph3',
             transformation = 'tsclean()',
             traindays = 7,
-            testdays = 1,
-            xreg = 'fourier(., h=h, K=1)')
+            testdays = 3,
+            xreg = 'fourier(., h=h, K=2)')
 
 
 # other tries ----

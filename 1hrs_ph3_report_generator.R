@@ -198,10 +198,10 @@ report.full(model = paste('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="
             transformation = 'identity()',
             traindays = best.fourier.traindays, # 7
             testdays = best.fourier.testdays, # 2
-            xreg = paste('fourier(., h=h, K=', best.k, ')'))
+            xreg = paste('fourier(., h=h, K=', best.k, ')')) # 2
 
 #  best for 7:2, ARIMA(1,0,0)(1,0,0) with fourier k=2, RMSE=311, MAE=179 || with tsclean RMSE= 320, MAE=168 ----
-
+#For observation based 168:2, same model, same k, RMSE=317, MAE =186
 report.full(output_format = "pdf_document",
             model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS", xreg=fourier(., K=2))',
             series = '1hrs ph3',
@@ -241,19 +241,18 @@ for(testobs in 1:(frequency(datasets[['1hrs ph3']]$series) - 1)) # 1:23
   }
 }
 
-#RMSE 336
 report.full(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS")',
             series = '1hrs ph3',
             transformation = 'identity()',
             traindays = trainobs,
-            testdays = best.testobs, # 1
+            testdays = best.testobs, # 19
             obs = TRUE)
 
 
 best.fcast.obs.fourier.1hrsPh3 <- NULL
 best.fourier.testobs <- 0
 
-for(testobs in 1:(frequency(datasets[['1hrs ph3']]$series) - 1)) # 1:11
+for(testobs in 2:(frequency(datasets[['1hrs ph3']]$series) - 1)) # 2:23
 {
   print(paste("Trying", trainobs, "train observations and", testobs, "test observations"))
   current <- fullforecast.obs(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), xreg=fourier(., K=2), method="CSS")',
@@ -270,12 +269,11 @@ for(testobs in 1:(frequency(datasets[['1hrs ph3']]$series) - 1)) # 1:11
   }
 }
 
-#RMSE 316
 report.full(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), xreg=fourier(., K=2), method="CSS")',
             series = '1hrs ph3',
             transformation = 'identity()',
             traindays = trainobs,
-            testdays = best.fourier.testobs, # 1
+            testdays = best.fourier.testobs, # 2
             xreg = 'fourier(., h=h, K=2)',
             obs = TRUE)
 
@@ -285,7 +283,7 @@ report.full(model = paste('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="
             series = '1hrs ph3',
             transformation = 'tsclean()',
             traindays = 7,
-            testdays = 1,
+            testdays = 2,
             xreg = paste('fourier(., h=h, K=', 2, ')'))
 
 
