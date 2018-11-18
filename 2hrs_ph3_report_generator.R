@@ -528,6 +528,7 @@ report(model = paste0('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="ML",
             testdays = 3,
             xreg = paste0(deparse(x.fcast), collapse=''))
 
+#7:3 rmse=326 mae=189
 report.full(model = paste0('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS", xreg=', paste0(deparse(x.fit), collapse='') ,')'),
             series = '2hrs ph3',
             transformation = 'identity()',
@@ -540,6 +541,67 @@ report.full(model = paste0('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method=
 {eval(x)} ->
     external.regressors)
 plot(external.regressors)
+
+# dummies on every weekday ----
+
+dailyD.fcast <- quote(
+  {cbind(
+    dummies=getDailyDummies(h, frequency(.)),
+    fourier(., h=h, K=2)
+  )}
+)
+
+dailyD.fit <- quote(
+  {cbind(
+    dummies=getDailyDummies(length(.), frequency(.)),
+    fourier(., K=2)
+  )}
+)
+
+report(model = paste0('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS", xreg=', paste0(deparse(dailyD.fit), collapse='') ,')'),
+       series = '2hrs ph3',
+       transformation = 'identity()',
+       traindays = 7,
+       testdays = 3,
+       xreg = paste0(deparse(dailyD.fcast), collapse=''))
+
+# 7:3 rmse=333, mae=202
+report.full(model = paste0('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="ML", xreg=', paste0(deparse(dailyD.fit), collapse='') ,')'),
+       series = '2hrs ph3',
+       transformation = 'identity()',
+       traindays = 7,
+       testdays = 3,
+       xreg = paste0(deparse(dailyD.fcast), collapse=''))
+# dummies on 5th hour (the "outlier") ----
+
+fifthHD.fcast <- quote(
+  {cbind(
+    dummies=get5thHourDummies(h, frequency(.)),
+    fourier(., h=h, K=2)
+  )}
+)
+
+fifthHD.fit <- quote(
+  {cbind(
+    dummies=get5thHourDummies(length(.), frequency(.)),
+    fourier(., K=2)
+  )}
+)
+
+report(model = paste0('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS", xreg=', paste0(deparse(fifthHD.fit), collapse='') ,')'),
+       series = '2hrs ph3',
+       transformation = 'identity()',
+       traindays = 7,
+       testdays = 3,
+       xreg = paste0(deparse(fifthHD.fcast), collapse=''))
+
+# 7:3 rmse=318, mae=179
+report.full(model = paste0('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="ML", xreg=', paste0(deparse(fifthHD.fit), collapse='') ,')'),
+            series = '2hrs ph3',
+            transformation = 'identity()',
+            traindays = 7,
+            testdays = 3,
+            xreg = paste0(deparse(fifthHD.fcast), collapse=''))
 
 # other tries ----
 report.full(model = 'Arima(order=c(2, 1, 1), seasonal=c(2, 0, 0))',

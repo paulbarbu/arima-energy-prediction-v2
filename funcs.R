@@ -87,6 +87,43 @@ get6thDayDummies <- function(len, numObsPerDay)
   return(dummies)
 }
 
+get5thHourDummies <- function(len, numObsPerDay)
+{
+  assertthat::assert_that(5 < numObsPerDay)
+  
+  dummies <- NULL
+  oneDay <- c(rep(0, 4), 1, rep(0, numObsPerDay-5))
+  
+  upRoundedDays <- rep(oneDay, (len/numObsPerDay)+1)
+  dummies <- head(upRoundedDays, len)
+  
+  return(dummies)
+}
+
+getDailyDummies <- function(len, numObsPerDay)
+{
+  dummies <- cbind(
+    Monday = c(rep(1, numObsPerDay), rep(0, 6*numObsPerDay)),
+    Tuesday = c(rep(0, 1*numObsPerDay), rep(1, numObsPerDay), rep(0, 5*numObsPerDay)),
+    Wednesday = c(rep(0, 2*numObsPerDay), rep(1, numObsPerDay), rep(0, 4*numObsPerDay)),
+    Thursday = c(rep(0, 3*numObsPerDay), rep(1, numObsPerDay), rep(0, 3*numObsPerDay)),
+    Friday = c(rep(0, 4*numObsPerDay), rep(1, numObsPerDay), rep(0, 2*numObsPerDay)),
+    Saturday = c(rep(0, 5*numObsPerDay), rep(1, numObsPerDay), rep(0, 1*numObsPerDay))
+  )
+  week.len <- numObsPerDay * 7
+  
+  if(len < length((week.len)))
+  {
+    dummies <- head(dummies, len)
+  }else{
+    upRoundedDummies <- do.call("rbind", (replicate((len/week.len)+1, dummies, simplify=FALSE)))
+    dummies <- head(upRoundedDummies, len)
+  }
+  
+  return(dummies)
+}
+
+
 generateDirAndFilename <- function(report.params, extension, prepend='')
 {
   fmt <- paste0(prepend, paste0(rep('%s.', length(report.params)), collapse=''), extension)
@@ -171,7 +208,7 @@ fullforecast <- function(dataset, transformation, model, traindays, testdays, xr
   gc()
   
   fcasts$points <- foreach(currentday = seq(startday, endday, testdays),
-                           .export = c("get_days", "get6thDayDummies"),
+                           .export = c("get_days", "get6thDayDummies", "getDailyDummies", "get5thHourDummies"),
                            .packages = c("forecast"),
                            .combine = c, 
                            .verbose = TRUE) %dopar%
