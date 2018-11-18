@@ -34,7 +34,7 @@ report.full(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS")'
 report.full(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS", xreg=fourier(., K=3))',
             series = 'ph2',
             transformation = 'identity()',
-            traindays = 7,
+            traindays = 4,
             testdays = 3,
             xreg = 'fourier(., h=h, K=3)',
             serial = TRUE)
@@ -48,30 +48,32 @@ report.full(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS", 
             xreg = 'fourier(., h=h, K=1)',
             serial = TRUE)
 
-# with 5th hour dummies - inspiration from 2hrs series
-fifthHD.fcast <- quote(
+# with 8th hour up to 11th dummies - inspiration from 2hrs series combined with the ratio from the 1hrs
+# K=3 - more complex seasonality on denser data - from 1hrs
+obsDummies.fcast <- quote(
   {cbind(
-    dummies=get5thHourDummies(h, frequency(.)),
-    fourier(., h=h, K=1)
+    dummies=getNthObsDummies(8*frequency(.)+1, 3*frequency(.), length(.), frequency(.)),
+    fourier(., h=h, K=3)
   )}
 )
 
-fifthHD.fit <- quote(
+obsDummies.fit <- quote(
   {cbind(
-    dummies=get5thHourDummies(length(.), frequency(.)),
-    fourier(., K=1)
+    dummies=getNthObsDummies(8*frequency(.)+1, 3*frequency(.), length(.), frequency(.)),
+    fourier(., K=3)
   )}
 )
 
-report.full(model = paste0('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS", xreg=', paste0(deparse(fifthHD.fit), collapse='') ,')'),
+report.full(model = paste0('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS", xreg=', paste0(deparse(obsDummies.fit), collapse='') ,')'),
             series = 'ph2',
             transformation = 'identity()',
-            traindays = 7,
+            traindays = 4,
             testdays = 3,
-            xreg = paste0(deparse(fifthHD.fcast), collapse=''),
+            xreg = paste0(deparse(obsDummies.fcast), collapse=''),
             serial = TRUE)
 
-#with 6th day dummies - inspiration from 1hrs series
+#with 6th day dummies - inspiration from 1hrs series 
+#with 7:3 since we're talking about 6th day dummies hence we need a training week
 
 sixthDD.fcast <- quote(
   {cbind(

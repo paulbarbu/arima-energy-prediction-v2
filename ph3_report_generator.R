@@ -95,17 +95,17 @@ report.full(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS", 
             xreg = 'fourier(., h=h, K=2)',
             serial = TRUE)
 
-# with 5th hour dummies
+# with 8th hour up to 11th dummies (ispiration from 1hrs mainly, but also 2hrs sicne there we had 5 obs)
 fifthHD.fcast <- quote(
   {cbind(
-    dummies=get5thHourDummies(h, frequency(.)),
+    dummies=getNthObsDummies(8*frequency(.)+1, 3*frequency(.), h, frequency(.)),
     fourier(., h=h, K=2)
   )}
 )
 
 fifthHD.fit <- quote(
   {cbind(
-    dummies=get5thHourDummies(length(.), frequency(.)),
+    dummies=getNthObsDummies(8*frequency(.)+1, 3*frequency(.), length(.), frequency(.)),
     fourier(., K=2)
   )}
 )
