@@ -87,12 +87,12 @@ get6thDayDummies <- function(len, numObsPerDay)
   return(dummies)
 }
 
-get5thHourDummies <- function(len, numObsPerDay)
+getNthObsDummies <- function(nth, dummyLen, len, numObsPerDay)
 {
-  assertthat::assert_that(5 < numObsPerDay)
+  assertthat::assert_that(nth < numObsPerDay)
   
   dummies <- NULL
-  oneDay <- c(rep(0, 4), 1, rep(0, numObsPerDay-5))
+  oneDay <- c(rep(0, nth-1), rep(1, dummyLen), rep(0, numObsPerDay-nth-dummyLen+1))
   
   upRoundedDays <- rep(oneDay, (len/numObsPerDay)+1)
   dummies <- head(upRoundedDays, len)
@@ -208,7 +208,7 @@ fullforecast <- function(dataset, transformation, model, traindays, testdays, xr
   gc()
   
   fcasts$points <- foreach(currentday = seq(startday, endday, testdays),
-                           .export = c("get_days", "get6thDayDummies", "getDailyDummies", "get5thHourDummies"),
+                           .export = c("get_days", "get6thDayDummies", "getDailyDummies", "getNthObsDummies"),
                            .packages = c("forecast"),
                            .combine = c, 
                            .verbose = TRUE) %dopar%

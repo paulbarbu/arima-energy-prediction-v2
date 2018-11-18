@@ -1,0 +1,1 @@
+full_Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="ML", xreg={    cbind(dummies = getNthObsDummies(5, 2, length(.), frequency(.)),         fourier(., K = 2))}).2hrs ph2.identity().7.3.{    cbind(dummies = getNthObsDummies(5, 2, h, frequency(.)),         fourier(., h = h, K = 2))}.html

@@ -140,7 +140,8 @@ report.full(model = paste('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="
             xreg = paste('fourier(., h=h, K=', best.k, ')')) #1
 
 # Best model: 7:3, ARIMA(1, 0, 0)(1, 0, 0), K=1, RMSE=373.8851 MAE=184.5098 ----
-# 5th hour dummies RMSE=376  MAE=183
+# 5th obs dummies RMSE=376  MAE=183
+# 5th-7th obs dummies RMSE=381  MAE=180
 report.full(output_format = 'pdf_document',
             model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS", xreg=fourier(., K=1))',
             series = '2hrs ph2',
@@ -149,27 +150,49 @@ report.full(output_format = 'pdf_document',
             testdays = 3,
             xreg = 'fourier(., h=h, K=1)')
 
-fifthHD.fcast <- quote(
+fifthOD.fcast <- quote(
   {cbind(
-    dummies=get5thHourDummies(h, frequency(.)),
+    dummies=getNthObsDummies(5, 1, h, frequency(.)),
     fourier(., h=h, K=1)
   )}
 )
 
-fifthHD.fit <- quote(
+fifthOD.fit <- quote(
   {cbind(
-    dummies=get5thHourDummies(length(.), frequency(.)),
+    dummies=getNthObsDummies(5, 1, length(.), frequency(.)),
     fourier(., K=1)
   )}
 )
 
 report.full(#output_format = 'pdf_document',
-  model = paste0('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS", xreg=', paste0(deparse(fifthHD.fit), collapse='') ,')'),
+  model = paste0('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS", xreg=', paste0(deparse(fifthOD.fit), collapse='') ,')'),
   series = '2hrs ph2',
   transformation = 'identity()',
   traindays = 7,
   testdays = 3,
-  xreg = paste0(deparse(fifthHD.fcast), collapse=''))
+  xreg = paste0(deparse(fifthOD.fcast), collapse=''))
+
+fifth7OD.fcast <- quote(
+  {cbind(
+    dummies=getNthObsDummies(5, 2, h, frequency(.)),
+    fourier(., h=h, K=2)
+  )}
+)
+
+fifth7OD.fit <- quote(
+  {cbind(
+    dummies=getNthObsDummies(5, 2, length(.), frequency(.)),
+    fourier(., K=2)
+  )}
+)
+
+report.full(model = paste0('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="ML", xreg=', paste0(deparse(fifth7OD.fit), collapse='') ,')'),
+            series = '2hrs ph2',
+            transformation = 'identity()',
+            traindays = 7,
+            testdays = 3,
+            xreg = paste0(deparse(fifth7OD.fcast), collapse=''))
+
 
 # dummies on 6th day - 6th day has an "outlier" ----
 
@@ -218,28 +241,52 @@ report.full(model = paste0('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method=
             traindays = 7,
             testdays = 3,
             xreg = paste0(deparse(dailyD.fcast), collapse=''))
-# dummies on 5th hour (the "outlier") ----
+# dummies on the 5th obs (the "outlier") ----
 
-fifthHD.fcast <- quote(
+fifthOD.fcast <- quote(
   {cbind(
-    dummies=get5thHourDummies(h, frequency(.)),
+    dummies=getNthObsDummies(5, 1, h, frequency(.)),
     fourier(., h=h, K=1)
   )}
 )
 
-fifthHD.fit <- quote(
+fifthOD.fit <- quote(
   {cbind(
-    dummies=get5thHourDummies(length(.), frequency(.)),
+    dummies=getNthObsDummies(5, 1, length(.), frequency(.)),
     fourier(., K=1)
   )}
 )
 
 # 7:3 rmse=376, mae=183
-report.full(model = paste0('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS", xreg=', paste0(deparse(fifthHD.fit), collapse='') ,')'),
+report.full(model = paste0('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS", xreg=', paste0(deparse(fifthOD.fit), collapse='') ,')'),
             series = '2hrs ph2',
             transformation = 'identity()',
             traindays = 7,
             testdays = 3,
-            xreg = paste0(deparse(fifthHD.fcast), collapse=''))
+            xreg = paste0(deparse(fifthOD.fcast), collapse=''))
+
+# dummies on the 5th to the 7th obs (the "outliers") ----
+
+fifth7OD.fcast <- quote(
+  {cbind(
+    dummies=getNthObsDummies(5, 2, h, frequency(.)),
+    fourier(., h=h, K=2)
+  )}
+)
+
+fifth7OD.fit <- quote(
+  {cbind(
+    dummies=getNthObsDummies(5, 2, length(.), frequency(.)),
+    fourier(., K=2)
+  )}
+)
+
+# 7:3 rmse=381, mae=180
+report.full(model = paste0('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="ML", xreg=', paste0(deparse(fifth7OD.fit), collapse='') ,')'),
+            series = '2hrs ph2',
+            transformation = 'identity()',
+            traindays = 7,
+            testdays = 3,
+            xreg = paste0(deparse(fifth7OD.fcast), collapse=''))
 
 

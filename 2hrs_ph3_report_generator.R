@@ -396,7 +396,7 @@ report.full(model = paste('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="
 
 # Best model: ARIMA(1, 0, 0)(1, 0, 0) (K=2), 7:3, RMSE 318, MAE 182 || with tsclean RMSE 330, MAE 169 ----
 # For tsclean() RMSE has gone up since it applies bigger penalty to the bigger errors (there are bigger errors since tsclean "smoothes" the data hence the outliers will give even bigger errors)
-# For 5thHour: RMSE=318 ; MAE=179
+# For 5th obs: RMSE=318 ; MAE=179
 report.full(output_format = 'pdf_document',
             model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="ML", xreg=fourier(., K=2))',
             series = '2hrs ph3',
@@ -413,27 +413,27 @@ report.full(output_format = 'pdf_document',
             testdays = 3,
             xreg = 'fourier(., h=h, K=2)')
 
-fifthHD.fcast <- quote(
+fifthOD.fcast <- quote(
   {cbind(
-    dummies=get5thHourDummies(h, frequency(.)),
+    dummies=getNthObsDummies(5, 1, h, frequency(.)),
     fourier(., h=h, K=2)
   )}
 )
 
-fifthHD.fit <- quote(
+fifthOD.fit <- quote(
   {cbind(
-    dummies=get5thHourDummies(length(.), frequency(.)),
+    dummies=getNthObsDummies(5, 1, length(.), frequency(.)),
     fourier(., K=2)
   )}
 )
 
 report.full(#output_format = 'pdf_document',
-            model = paste0('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="ML", xreg=', paste0(deparse(fifthHD.fit), collapse='') ,')'),
+            model = paste0('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="ML", xreg=', paste0(deparse(fifthOD.fit), collapse='') ,')'),
             series = '2hrs ph3',
             transformation = 'identity()',
             traindays = 7,
             testdays = 3,
-            xreg = paste0(deparse(fifthHD.fcast), collapse=''))
+            xreg = paste0(deparse(fifthOD.fcast), collapse=''))
 
 # observation based modelling ----
 report(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="ML")',
@@ -595,36 +595,61 @@ report.full(model = paste0('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method=
        traindays = 7,
        testdays = 3,
        xreg = paste0(deparse(dailyD.fcast), collapse=''))
-# dummies on 5th hour (the "outlier") ----
+# dummies on the 5th obs (the "outlier") ----
 
-fifthHD.fcast <- quote(
+fifthOD.fcast <- quote(
   {cbind(
-    dummies=get5thHourDummies(h, frequency(.)),
+    dummies=getNthObsDummies(5, 1, h, frequency(.)),
     fourier(., h=h, K=2)
   )}
 )
 
-fifthHD.fit <- quote(
+fifthOD.fit <- quote(
   {cbind(
-    dummies=get5thHourDummies(length(.), frequency(.)),
+    dummies=getNthObsDummies(5, 1, length(.), frequency(.)),
     fourier(., K=2)
   )}
 )
 
-report(model = paste0('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS", xreg=', paste0(deparse(fifthHD.fit), collapse='') ,')'),
+report(model = paste0('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS", xreg=', paste0(deparse(fifthOD.fit), collapse='') ,')'),
        series = '2hrs ph3',
        transformation = 'identity()',
        traindays = 7,
        testdays = 3,
-       xreg = paste0(deparse(fifthHD.fcast), collapse=''))
+       xreg = paste0(deparse(fifthOD.fcast), collapse=''))
 
 # 7:3 rmse=318, mae=179
-report.full(model = paste0('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="ML", xreg=', paste0(deparse(fifthHD.fit), collapse='') ,')'),
+report.full(model = paste0('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="ML", xreg=', paste0(deparse(fifthOD.fit), collapse='') ,')'),
             series = '2hrs ph3',
             transformation = 'identity()',
             traindays = 7,
             testdays = 3,
-            xreg = paste0(deparse(fifthHD.fcast), collapse=''))
+            xreg = paste0(deparse(fifthOD.fcast), collapse=''))
+
+# dummies on the 5th to the 7th obs (the "outliers") ----
+
+fifth7OD.fcast <- quote(
+  {cbind(
+    dummies=getNthObsDummies(5, 2, h, frequency(.)),
+    fourier(., h=h, K=2)
+  )}
+)
+
+fifth7OD.fit <- quote(
+  {cbind(
+    dummies=getNthObsDummies(5, 2, length(.), frequency(.)),
+    fourier(., K=2)
+  )}
+)
+
+# 7:3 rmse=322, mae=184
+report.full(model = paste0('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="ML", xreg=', paste0(deparse(fifth7OD.fit), collapse='') ,')'),
+            series = '2hrs ph3',
+            transformation = 'identity()',
+            traindays = 7,
+            testdays = 3,
+            xreg = paste0(deparse(fifth7OD.fcast), collapse=''))
+
 
 # other tries ----
 report.full(model = 'Arima(order=c(2, 1, 1), seasonal=c(2, 0, 0))',
