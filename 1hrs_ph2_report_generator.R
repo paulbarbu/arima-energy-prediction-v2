@@ -1,0 +1,236 @@
+source('funcs.R')
+
+# benchmark models  ----
+
+report.full(model = 'snaive()',
+            series = '1hrs ph2',
+            transformation = 'identity()',
+            traindays = 7,
+            testdays = 1)
+
+report.full(model = 'meanf()',
+            series = '1hrs ph2',
+            transformation = 'identity()',
+            traindays = 7,
+            testdays = 1)
+
+report.full(model = 'naive()',
+            series = '1hrs ph2',
+            transformation = 'identity()',
+            traindays = 7,
+            testdays = 1)
+
+# try to find the best ARIMA model  ----
+
+# sinusoidal ACF and 1 lag in PACF
+report(model = 'Arima(order=c(1, 0, 0))',
+       series = '1hrs ph2',
+       transformation = 'identity()',
+       diffs = 'identity()',
+       sdiffs = 'identity()',
+       startday = -10,
+       traindays = 7,
+       testdays = 3)
+
+# significant values in lags of order 12
+report(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0))',
+       series = '1hrs ph2',
+       transformation = 'identity()',
+       diffs = 'identity()',
+       sdiffs = 'identity()',
+       startday = -10,
+       traindays = 7,
+       testdays = 3)
+
+# significant values around lags 1 and seasonal lags so we try to incorporate them, the distribution of residuals seems slightly better (more normal)
+report(model = 'Arima(order=c(2, 0, 0), seasonal=c(2, 0, 0))',
+       series = '1hrs ph2',
+       transformation = 'identity()',
+       diffs = 'identity()',
+       sdiffs = 'identity()',
+       startday = -10,
+       traindays = 7,
+       testdays = 3)
+
+# try with MA & seasonal MA terms since the data could fit the "pattern" - worse than AR
+report(model = 'Arima(order=c(0, 0, 1), seasonal=c(0, 0, 1))',
+       series = '1hrs ph2',
+       transformation = 'identity()',
+       diffs = 'identity()',
+       sdiffs = 'identity()',
+       startday = -10,
+       traindays = 7,
+       testdays = 3)
+
+#  Find the best train:test days ratio for ARIMA(1,0,0)(1,0,0) ----
+
+best.fcast.1hrsPh2 <- NULL
+best.traindays <- 0
+best.testdays <- 0
+
+for(traindays in 3:7)
+{
+  for(testdays in 2:3) # for "1" I got: non-finite finite-difference value in optim
+  {
+    print(paste("Trying", traindays, "train days and", testdays, "test days"))
+    current <- fullforecast(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS")',
+                            dataset = datasets[['1hrs ph2']]$series,
+                            transformation = 'identity()',
+                            traindays = traindays,
+                            testdays = testdays,
+                            xreg=NULL)
+    
+    if(is.null(best.fcast.1hrsPh2) || current$accuracy[[2]] < best.fcast.1hrsPh2$accuracy[[2]])
+    {
+      best.fcast.1hrsPh2 <- current
+      best.traindays <- traindays
+      best.testdays <- testdays
+    }
+  }
+}
+
+report.full(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS")',
+            series = '1hrs ph2',
+            transformation = 'identity()',
+            traindays = best.traindays, # 4
+            testdays = best.testdays) # 3
+
+# Skip over the step where I hardcode a fourier value ----
+# Find best K for the above model ARIMA(1,0,0)(1,0,0) ----
+
+best.fcast.k.1hrsPh2 <- NULL
+best.k <- 0
+#K must be not be greater than period/2
+for(k in 3:(frequency(datasets[['1hrs ph2']]$series)/2)) # for lower k, errors: 
+{
+  print(paste("Trying k =", k))
+  m <- paste0('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS", xreg=fourier(., K=', k, '))')
+  xreg <- paste0('fourier(., h=h, K=', k, ')')
+  current <- fullforecast(model = m,
+                          dataset = datasets[['1hrs ph2']]$series,
+                          transformation = 'identity()',
+                          traindays = best.traindays, # 4
+                          testdays = best.testdays, # 3
+                          xreg=xreg)
+  
+  if(is.null(best.fcast.k.1hrsPh2) || current$accuracy[[2]] < best.fcast.k.1hrsPh2$accuracy[[2]])
+  {
+    best.fcast.k.1hrsPh2 <- current
+    best.k <- k
+  }
+}
+
+report.full(model = paste('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS", xreg=fourier(., K=', best.k, '))', sep=''),
+            series = '1hrs ph2',
+            transformation = 'identity()',
+            traindays = best.traindays, # 4
+            testdays = best.testdays, # 3
+            xreg = paste('fourier(., h=h, K=', best.k, ')')) #3
+
+# Best model: 3:2, ARIMA(1, 0, 0)(1, 0, 0), K=3, RMSE=350 MAE=165 ----
+# 6th day dummies RMSE=340 MAE=159
+report.full(output_format = 'pdf_document',
+            model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS", xreg=fourier(., K=3))',
+            series = '1hrs ph2',
+            transformation = 'identity()',
+            traindays = 4,
+            testdays = 3,
+            xreg = 'fourier(., h=h, K=3)')
+
+sixthDD.fcast <- quote(
+  {cbind(
+    dummies=get6thDayDummies(h, frequency(.)),
+    fourier(., h=h, K=3)
+  )}
+)
+
+sixthDD.fit <- quote(
+  {cbind(
+    dummies=get6thDayDummies(length(.), frequency(.)),
+    fourier(., K=3)
+  )}
+)
+
+#7:3 rmse=340 mae=159
+#non-finite value supplied by optim for 4 days of training  - because we talk about weeks but do not train on one
+report.full(model = paste0('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS", xreg=', paste0(deparse(sixthDD.fit), collapse='') ,')'),
+            series = '1hrs ph2',
+            transformation = 'identity()',
+            traindays = 7,
+            testdays = 3,
+            xreg = paste0(deparse(sixthDD.fcast), collapse=''))
+
+# dummies on 6th day - 6th day has an "outlier" ----
+
+sixthDD.fcast <- quote(
+  {cbind(
+    dummies=get6thDayDummies(h, frequency(.)),
+    fourier(., h=h, K=3)
+  )}
+)
+
+sixthDD.fit <- quote(
+  {cbind(
+    dummies=get6thDayDummies(length(.), frequency(.)),
+    fourier(., K=3)
+  )}
+)
+
+#7:3 rmse=340 mae=159
+#non-finite value supplied by optim for 4 days of training  - because we talk about weeks but do not train on one
+report.full(model = paste0('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS", xreg=', paste0(deparse(sixthDD.fit), collapse='') ,')'),
+            series = '1hrs ph2',
+            transformation = 'identity()',
+            traindays = 7,
+            testdays = 3,
+            xreg = paste0(deparse(sixthDD.fcast), collapse=''))
+
+# dummies on every weekday ----
+
+dailyD.fcast <- quote(
+  {cbind(
+    dummies=getDailyDummies(h, frequency(.)),
+    fourier(., h=h, K=3)
+  )}
+)
+
+dailyD.fit <- quote(
+  {cbind(
+    dummies=getDailyDummies(length(.), frequency(.)),
+    fourier(., K=3)
+  )}
+)
+
+# 7:3 rmse=346, mae=169
+#non-finite value supplied by optim"
+report.full(model = paste0('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS", xreg=', paste0(deparse(dailyD.fit), collapse='') ,')'),
+            series = '1hrs ph2',
+            transformation = 'identity()',
+            traindays = 7,
+            testdays = 3,
+            xreg = paste0(deparse(dailyD.fcast), collapse=''))
+# dummies on 5th hour (the "outlier") ----
+
+fifthHD.fcast <- quote(
+  {cbind(
+    dummies=get5thHourDummies(h, frequency(.)),
+    fourier(., h=h, K=3)
+  )}
+)
+
+fifthHD.fit <- quote(
+  {cbind(
+    dummies=get5thHourDummies(length(.), frequency(.)),
+    fourier(., K=3)
+  )}
+)
+
+# 4:3 rmse=350, mae=165
+report.full(model = paste0('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS", xreg=', paste0(deparse(fifthHD.fit), collapse='') ,')'),
+            series = '1hrs ph2',
+            transformation = 'identity()',
+            traindays = 4,
+            testdays = 3,
+            xreg = paste0(deparse(fifthHD.fcast), collapse=''))
+
+

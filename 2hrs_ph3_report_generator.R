@@ -435,8 +435,6 @@ report.full(#output_format = 'pdf_document',
             testdays = 3,
             xreg = paste0(deparse(fifthHD.fcast), collapse=''))
 
-
-
 # observation based modelling ----
 report(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="ML")',
        series = '2hrs ph3',

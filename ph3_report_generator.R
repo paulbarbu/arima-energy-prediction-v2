@@ -86,7 +86,7 @@ report.full(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS")'
             testdays = 2,
             serial = TRUE)
 
-# inspiration from 1hrs series
+# inspiration from 1hrs & 2hrs series
 report.full(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS", xreg=fourier(., K=2))',
             series = 'ph3',
             transformation = 'identity()',
