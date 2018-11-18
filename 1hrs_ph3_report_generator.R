@@ -218,6 +218,26 @@ report.full(output_format = "pdf_document",
             testdays = 2,
             xreg = paste('fourier(., h=h, K=', 2, ')'))
 
+fifthHD.fcast <- quote(
+  {cbind(
+    dummies=get5thHourDummies(h, frequency(.)),
+    fourier(., h=h, K=2)
+  )}
+)
+
+fifthHD.fit <- quote(
+  {cbind(
+    dummies=get5thHourDummies(length(.), frequency(.)),
+    fourier(., K=2)
+  )}
+)
+
+report.full(model = paste0('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS", xreg=', paste0(deparse(fifthHD.fit), collapse='') ,')'),
+            series = '1hrs ph3',
+            transformation = 'identity()',
+            traindays = 7,
+            testdays = 2,
+            xreg = paste0(deparse(fifthHD.fcast), collapse=''))
 
 # observation based modelling ----
 best.fcast.obs.1hrsPh3 <- NULL
@@ -286,6 +306,104 @@ report.full(model = paste('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="
             testdays = 2,
             xreg = paste('fourier(., h=h, K=', 2, ')'))
 
+
+# dummies on 6th day - 6th day is has an "outlier" ----
+
+sixthDD.fcast <- quote(
+  {cbind(
+    dummies=get6thDayDummies(h, frequency(.)),
+    fourier(., h=h, K=2)
+  )}
+)
+
+sixthDD.fit <- quote(
+  {cbind(
+    dummies=get6thDayDummies(length(.), frequency(.)),
+    fourier(., K=2)
+  )}
+)
+
+report(model = paste0('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS", xreg=', paste0(deparse(sixthDD.fit), collapse='') ,')'),
+       series = '1hrs ph3',
+       transformation = 'identity()',
+       traindays = 7,
+       testdays = 2,
+       xreg = paste0(deparse(sixthDD.fcast), collapse=''))
+
+#7:2 rmse=311 mae=180
+report.full(model = paste0('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS", xreg=', paste0(deparse(sixthDD.fit), collapse='') ,')'),
+            series = '1hrs ph3',
+            transformation = 'identity()',
+            traindays = 7,
+            testdays = 2,
+            xreg = paste0(deparse(sixthDD.fcast), collapse=''))
+
+
+(datasets[['1hrs ph3']]$series %>% 
+{eval(x)} ->
+    external.regressors)
+plot(external.regressors)
+
+# dummies on every weekday ----
+
+dailyD.fcast <- quote(
+  {cbind(
+    dummies=getDailyDummies(h, frequency(.)),
+    fourier(., h=h, K=2)
+  )}
+)
+
+dailyD.fit <- quote(
+  {cbind(
+    dummies=getDailyDummies(length(.), frequency(.)),
+    fourier(., K=2)
+  )}
+)
+
+report(model = paste0('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS", xreg=', paste0(deparse(dailyD.fit), collapse='') ,')'),
+       series = '1hrs ph3',
+       transformation = 'identity()',
+       traindays = 7,
+       testdays = 2,
+       xreg = paste0(deparse(dailyD.fcast), collapse=''))
+
+# 7:2 rmse=322, mae=195
+report.full(model = paste0('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS", xreg=', paste0(deparse(dailyD.fit), collapse='') ,')'),
+            series = '1hrs ph3',
+            transformation = 'identity()',
+            traindays = 7,
+            testdays = 2,
+            xreg = paste0(deparse(dailyD.fcast), collapse=''))
+# dummies on 5th hour (the "outlier") ----
+
+fifthHD.fcast <- quote(
+  {cbind(
+    dummies=get5thHourDummies(h, frequency(.)),
+    fourier(., h=h, K=2)
+  )}
+)
+
+fifthHD.fit <- quote(
+  {cbind(
+    dummies=get5thHourDummies(length(.), frequency(.)),
+    fourier(., K=2)
+  )}
+)
+
+report(model = paste0('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS", xreg=', paste0(deparse(fifthHD.fit), collapse='') ,')'),
+       series = '1hrs ph3',
+       transformation = 'identity()',
+       traindays = 7,
+       testdays = 2,
+       xreg = paste0(deparse(fifthHD.fcast), collapse=''))
+
+# 7:2 rmse=311, mae=179
+report.full(model = paste0('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS", xreg=', paste0(deparse(fifthHD.fit), collapse='') ,')'),
+            series = '1hrs ph3',
+            transformation = 'identity()',
+            traindays = 7,
+            testdays = 2,
+            xreg = paste0(deparse(fifthHD.fcast), collapse=''))
 
 # other tries ----
 
