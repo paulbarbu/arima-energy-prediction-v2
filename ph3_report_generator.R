@@ -77,3 +77,43 @@ report.full(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS", 
             xreg = 'fourier(., h=h, K=1)',
             serial = TRUE)
 
+# 7:2 full ----
+#simple
+report.full(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS")',
+            series = 'ph3',
+            transformation = 'identity()',
+            traindays = 7,
+            testdays = 2,
+            serial = TRUE)
+
+# inspiration from 1hrs series
+report.full(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS", xreg=fourier(., K=2))',
+            series = 'ph3',
+            transformation = 'identity()',
+            traindays = 7,
+            testdays = 2,
+            xreg = 'fourier(., h=h, K=2)',
+            serial = TRUE)
+
+# with 5th hour dummies
+fifthHD.fcast <- quote(
+  {cbind(
+    dummies=get5thHourDummies(h, frequency(.)),
+    fourier(., h=h, K=2)
+  )}
+)
+
+fifthHD.fit <- quote(
+  {cbind(
+    dummies=get5thHourDummies(length(.), frequency(.)),
+    fourier(., K=2)
+  )}
+)
+
+report.full(model = paste0('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS", xreg=', paste0(deparse(fifthHD.fit), collapse='') ,')'),
+            series = 'ph3',
+            transformation = 'identity()',
+            traindays = 7,
+            testdays = 2,
+            xreg = paste0(deparse(fifthHD.fcast), collapse=''),
+            serial = TRUE)

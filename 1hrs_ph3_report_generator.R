@@ -307,7 +307,7 @@ report.full(model = paste('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="
             xreg = paste('fourier(., h=h, K=', 2, ')'))
 
 
-# dummies on 6th day - 6th day is has an "outlier" ----
+# dummies on 6th day - 6th day has an "outlier" ----
 
 sixthDD.fcast <- quote(
   {cbind(
