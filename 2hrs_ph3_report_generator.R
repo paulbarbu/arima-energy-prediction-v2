@@ -532,14 +532,14 @@ report.full(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="ML", x
 
 sixthDD.fcast <- quote(
   {cbind(
-    dummies=get6thDayDummies(h, frequency(.)),
+    dummies=get6thDayDummies(h, frequency(.), start(.)[[1]]),
     fourier(., h=h, K=2)
   )}
 )
 
 sixthDD.fit <- quote(
   {cbind(
-    dummies=get6thDayDummies(length(.), frequency(.)),
+    dummies=get6thDayDummies(length(.), frequency(.), start(.)[[1]]),
     fourier(., K=2)
   )}
 )
@@ -551,7 +551,7 @@ report(model = paste0('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="ML",
             testdays = 3,
             xreg = paste0(deparse(sixthDD.fcast), collapse=''))
 
-#7:3 rmse=326 mae=189
+#7:3 rmse=330 mae=193
 report.full(model = paste0('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS", xreg=', paste0(deparse(sixthDD.fit), collapse='') ,')'),
             series = '2hrs ph3',
             transformation = 'identity()',
@@ -569,14 +569,14 @@ plot(external.regressors)
 
 dailyD.fcast <- quote(
   {cbind(
-    dummies=getDailyDummies(h, frequency(.)),
+    dummies=getDailyDummies(h, frequency(.), start(.)[[1]]),
     fourier(., h=h, K=2)
   )}
 )
 
 dailyD.fit <- quote(
   {cbind(
-    dummies=getDailyDummies(length(.), frequency(.)),
+    dummies=getDailyDummies(length(.), frequency(.), start(.)[[1]]),
     fourier(., K=2)
   )}
 )

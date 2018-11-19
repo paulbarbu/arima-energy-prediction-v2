@@ -71,17 +71,26 @@ get_obs <- function(dataset, startobs, trainobs = 7, testobs=3)
   return(days)
 }
 
-get6thDayDummies <- function(len, numObsPerDay)
+# https://stackoverflow.com/questions/18791212/equivalent-to-numpy-roll-in-r
+roll <- function( x , n ){
+  if( n == 0 )
+    return( x )
+  c( tail(x,n) , head(x,-n) )
+}
+
+get6thDayDummies <- function(numObsToGenerate, numObsPerDay, startDay)
 {
+  startDay <- startDay %% 7 # we "only" have 7 days in the week, 0 indexing for our dataset
   dummies <- NULL
   oneWeek <- c(rep(0, 5 * numObsPerDay), rep(1, numObsPerDay), rep(0, numObsPerDay))
+  oneWeek <- roll(oneWeek, -startDay*numObsPerDay) # roll to the left, startDay is 0 based
   
-  if(len < length((oneWeek)))
+  if(numObsToGenerate < length((oneWeek)))
   {
-    dummies <- head(oneWeek, len)
+    dummies <- head(oneWeek, numObsToGenerate)
   }else{
-    upRoundedWeeks <- rep(oneWeek, (len/length(oneWeek))+1)
-    dummies <- head(upRoundedWeeks, len)
+    upRoundedWeeks <- rep(oneWeek, (numObsToGenerate/length(oneWeek))+1)
+    dummies <- head(upRoundedWeeks, numObsToGenerate)
   }
   
   return(dummies)
@@ -100,8 +109,9 @@ getNthObsDummies <- function(nth, dummyLen, len, numObsPerDay)
   return(dummies)
 }
 
-getDailyDummies <- function(len, numObsPerDay)
+getDailyDummies <- function(numObsToGenerate, numObsPerDay, startDay)
 {
+  startDay <- startDay %% 7  # we "only" have 7 days in the week, 0 indexing for our dataset
   dummies <- cbind(
     Monday = c(rep(1, numObsPerDay), rep(0, 6*numObsPerDay)),
     Tuesday = c(rep(0, 1*numObsPerDay), rep(1, numObsPerDay), rep(0, 5*numObsPerDay)),
@@ -110,14 +120,16 @@ getDailyDummies <- function(len, numObsPerDay)
     Friday = c(rep(0, 4*numObsPerDay), rep(1, numObsPerDay), rep(0, 2*numObsPerDay)),
     Saturday = c(rep(0, 5*numObsPerDay), rep(1, numObsPerDay), rep(0, 1*numObsPerDay))
   )
+  
+  dummies <- apply(dummies, 2, roll, -startDay*numObsPerDay) # roll to the left, startDay is 0 based
   week.len <- numObsPerDay * 7
   
-  if(len < length((week.len)))
+  if(numObsToGenerate < length((week.len)))
   {
-    dummies <- head(dummies, len)
+    dummies <- head(dummies, numObsToGenerate)
   }else{
-    upRoundedDummies <- do.call("rbind", (replicate((len/week.len)+1, dummies, simplify=FALSE)))
-    dummies <- head(upRoundedDummies, len)
+    upRoundedDummies <- do.call("rbind", (replicate((numObsToGenerate/week.len)+1, dummies, simplify=FALSE)))
+    dummies <- head(upRoundedDummies, numObsToGenerate)
   }
   
   return(dummies)
@@ -208,7 +220,7 @@ fullforecast <- function(dataset, transformation, model, traindays, testdays, xr
   gc()
   
   fcasts$points <- foreach(currentday = seq(startday, endday, testdays),
-                           .export = c("get_days", "get6thDayDummies", "getDailyDummies", "getNthObsDummies"),
+                           .export = c("get_days", "get6thDayDummies", "getDailyDummies", "getNthObsDummies", "roll"),
                            .packages = c("forecast"),
                            .combine = c, 
                            .verbose = TRUE) %dopar%

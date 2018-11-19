@@ -71,28 +71,3 @@ report.full(model = paste0('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method=
             testdays = 3,
             xreg = paste0(deparse(obsDummies.fcast), collapse=''),
             serial = TRUE)
-
-#with 6th day dummies - inspiration from 1hrs series 
-#with 7:3 since we're talking about 6th day dummies hence we need a training week
-
-sixthDD.fcast <- quote(
-  {cbind(
-    dummies=get6thDayDummies(h, frequency(.)),
-    fourier(., h=h, K=3)
-  )}
-)
-
-sixthDD.fit <- quote(
-  {cbind(
-    dummies=get6thDayDummies(length(.), frequency(.)),
-    fourier(., K=3)
-  )}
-)
-
-report.full(model = paste0('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS", xreg=', paste0(deparse(sixthDD.fit), collapse='') ,')'),
-            series = 'ph2',
-            transformation = 'identity()',
-            traindays = 7,
-            testdays = 3,
-            xreg = paste0(deparse(sixthDD.fcast), collapse=''),
-            serial = TRUE)
