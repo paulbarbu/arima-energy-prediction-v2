@@ -21,7 +21,7 @@ report.full(model = 'naive()',
 
 # 7:1 full ----
 
-#Error in { : task 2 failed - "cannot allocate vector of size 6.5 Gb" 
+#Error in { : task 2 failed - "cannot allocate vector of size 6.5 Gb"
 report.full(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), xreg=fourier(., K=4), method="CSS")',
             series = 'ph3',
             transformation = 'identity()',
@@ -95,25 +95,31 @@ report.full(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS", 
             xreg = 'fourier(., h=h, K=2)',
             serial = TRUE)
 
-# with 8th hour up to 11th dummies (ispiration from 1hrs mainly, but also 2hrs sicne there we had 5 obs)
-fifthHD.fcast <- quote(
+# with 8th hour up to 11th dummies (inspiration from 1hrs mainly, but also 2hrs sicne there we had 5 obs)
+obsDummies.fcast <- quote(
   {cbind(
-    dummies=getNthObsDummies(8*frequency(.)+1, 3*frequency(.), h, frequency(.)),
+    dummies=getNthObsDummies(8*(frequency(.)/24)+1, 3*(frequency(.)/24), h, frequency(.)),
     fourier(., h=h, K=2)
   )}
 )
 
-fifthHD.fit <- quote(
+obsDummies.fit <- quote(
   {cbind(
-    dummies=getNthObsDummies(8*frequency(.)+1, 3*frequency(.), length(.), frequency(.)),
+    dummies=getNthObsDummies(8*(frequency(.)/24)+1, 3*(frequency(.)/24), length(.), frequency(.)),
     fourier(., K=2)
   )}
 )
 
-report.full(model = paste0('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS", xreg=', paste0(deparse(fifthHD.fit), collapse='') ,')'),
+report.full(model = paste0('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS", xreg=', paste0(deparse(obsDummies.fit), collapse='') ,')'),
             series = 'ph3',
             transformation = 'identity()',
             traindays = 7,
             testdays = 2,
-            xreg = paste0(deparse(fifthHD.fcast), collapse=''),
+            xreg = paste0(deparse(obsDummies.fcast), collapse=''),
             serial = TRUE)
+
+
+
+#[1] "Generating full data report file: ph3/full_Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method=CSS, xreg={    cbind(dummies = getNthObsDum--bd838a991faa4e3a3c48e3b74f08414c.html"
+#Quitting from lines 102-130 (full_forecast_model.Rmd)
+#Error: nth not less than numObsPerDay

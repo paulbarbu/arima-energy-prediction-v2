@@ -52,14 +52,14 @@ report.full(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS", 
 # K=3 - more complex seasonality on denser data - from 1hrs
 obsDummies.fcast <- quote(
   {cbind(
-    dummies=getNthObsDummies(8*frequency(.)+1, 3*frequency(.), length(.), frequency(.)),
+    dummies=getNthObsDummies(8*(frequency(.)/24)+1, 3*(frequency(.)/24), length(.), frequency(.)),
     fourier(., h=h, K=3)
   )}
 )
 
 obsDummies.fit <- quote(
   {cbind(
-    dummies=getNthObsDummies(8*frequency(.)+1, 3*frequency(.), length(.), frequency(.)),
+    dummies=getNthObsDummies(8*(frequency(.)/24)+1, 3*(frequency(.)/24), length(.), frequency(.)),
     fourier(., K=3)
   )}
 )
