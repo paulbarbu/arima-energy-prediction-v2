@@ -117,9 +117,3 @@ report.full(model = paste0('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method=
             testdays = 2,
             xreg = paste0(deparse(obsDummies.fcast), collapse=''),
             serial = TRUE)
-
-
-
-#[1] "Generating full data report file: ph3/full_Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method=CSS, xreg={    cbind(dummies = getNthObsDum--bd838a991faa4e3a3c48e3b74f08414c.html"
-#Quitting from lines 102-130 (full_forecast_model.Rmd)
-#Error: nth not less than numObsPerDay

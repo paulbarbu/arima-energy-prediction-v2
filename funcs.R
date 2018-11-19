@@ -272,6 +272,7 @@ fullforecast <- function(dataset, transformation, model, traindays, testdays, xr
   return(fcasts)
 }
 
+#fullforecast.serial(datasets[['2hrs ph3']]$series, 'identity()', 'meanf()', 4, 3, NULL)
 fullforecast.serial <- function(dataset, transformation, model, traindays, testdays, xreg, max.iterations = NULL)
 {
   startday <- 0
