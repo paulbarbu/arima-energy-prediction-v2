@@ -99,7 +99,10 @@ ggseasonplot(data$train, season.labels = season.labels) +
   ylab("Energy [Watts]") +
   guides(colour=guide_legend(title="Day")) +
   ggtitle('Seasonal plot for training data')
+}
 
+if(!params$obs)
+{
   ggsubseriesplot(data$train, labels = season.labels) +
     xlab("Season") +
     ylab("Energy [Watts]") +

@@ -140,8 +140,7 @@ report.full(model = paste('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="
             xreg = paste('fourier(., h=h, K=', best.k, ')')) #1
 
 # Best model: 7:3, ARIMA(1, 0, 0)(1, 0, 0), K=1, RMSE=373.8851 MAE=184.5098 ----
-# 5th obs dummies RMSE=376  MAE=183
-# 5th-7th obs dummies RMSE=381  MAE=180
+# 5th-7th obs dummies RMSE=370  MAE=178
 report.full(output_format = 'pdf_document',
             model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS", xreg=fourier(., K=1))',
             series = '2hrs ph2',
@@ -150,48 +149,28 @@ report.full(output_format = 'pdf_document',
             testdays = 3,
             xreg = 'fourier(., h=h, K=1)')
 
-fifthOD.fcast <- quote(
+
+bestObsDummies.fcast <- substitute(
   {cbind(
-    dummies=getNthObsDummies(5, 1, h, frequency(.)),
+    dummies=getNthObsDummies(4, 4, h, frequency(.)),
     fourier(., h=h, K=1)
   )}
 )
 
-fifthOD.fit <- quote(
+bestObsDummies.fit <- substitute(
   {cbind(
-    dummies=getNthObsDummies(5, 1, length(.), frequency(.)),
+    dummies=getNthObsDummies(4, 4, length(.), frequency(.)),
     fourier(., K=1)
   )}
 )
 
-report.full(#output_format = 'pdf_document',
-  model = paste0('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS", xreg=', paste0(deparse(fifthOD.fit), collapse='') ,')'),
-  series = '2hrs ph2',
-  transformation = 'identity()',
-  traindays = 7,
-  testdays = 3,
-  xreg = paste0(deparse(fifthOD.fcast), collapse=''))
-
-fifth7OD.fcast <- quote(
-  {cbind(
-    dummies=getNthObsDummies(5, 2, h, frequency(.)),
-    fourier(., h=h, K=2)
-  )}
-)
-
-fifth7OD.fit <- quote(
-  {cbind(
-    dummies=getNthObsDummies(5, 2, length(.), frequency(.)),
-    fourier(., K=2)
-  )}
-)
-
-report.full(model = paste0('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="ML", xreg=', paste0(deparse(fifth7OD.fit), collapse='') ,')'),
+# 7:3, dummies 4:4, rmse=370.118, mae=178.8
+report.full(model = paste0('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="ML", xreg=', paste0(deparse(bestObsDummies.fit), collapse='') ,')'),
             series = '2hrs ph2',
             transformation = 'identity()',
             traindays = 7,
             testdays = 3,
-            xreg = paste0(deparse(fifth7OD.fcast), collapse=''))
+            xreg = paste0(deparse(bestObsDummies.fcast), collapse=''))
 
 
 # dummies on 6th day - 6th day has an "outlier" ----
@@ -265,28 +244,72 @@ report.full(model = paste0('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method=
             testdays = 3,
             xreg = paste0(deparse(fifthOD.fcast), collapse=''))
 
-# dummies on the 5th to the 7th obs (the "outliers") ----
+# dummies on the 4-8th+1-5th obs (the "outliers") ----
 
-fifth7OD.fcast <- quote(
+best.fcast.dummy.2hrsPh2 <- NULL
+best.startDummy <- 0
+best.lenDummy <- 0
+
+for(startDummy in 4:8)
+{
+  for(lenDummy in 1:5)
+  {
+    print(paste("Trying startDummy =", startDummy, ", length =", lenDummy))
+    
+    obsDummies.fcast <- substitute(
+      {cbind(
+        dummies=getNthObsDummies(startDummy, lenDummy, h, frequency(.)),
+        fourier(., h=h, K=1)
+      )},
+      list(startDummy=startDummy, lenDummy=lenDummy)
+    )
+    
+    obsDummies.fit <- substitute(
+      {cbind(
+        dummies=getNthObsDummies(startDummy, lenDummy, length(.), frequency(.)),
+        fourier(., K=1)
+      )},
+      list(startDummy=startDummy, lenDummy=lenDummy)
+    )
+    
+    current <- fullforecast(model = paste0('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS", xreg=', paste0(deparse(obsDummies.fit), collapse='') ,')'),
+                            dataset = datasets[['2hrs ph2']]$series,
+                            transformation = 'identity()',
+                            traindays = 7,
+                            testdays = 3,
+                            xreg = paste0(deparse(obsDummies.fcast), collapse=''))
+    
+    if(is.null(best.fcast.dummy.2hrsPh2) || current$accuracy[[2]] < best.fcast.dummy.2hrsPh2$accuracy[[2]])
+    {
+      best.fcast.dummy.2hrsPh2 <- current
+      best.startDummy <- startDummy
+      best.lenDummy <- lenDummy
+    }
+    
+  }
+}
+
+bestObsDummies.fcast <- substitute(
   {cbind(
-    dummies=getNthObsDummies(5, 2, h, frequency(.)),
-    fourier(., h=h, K=2)
-  )}
+    dummies=getNthObsDummies(best.startDummy, best.lenDummy, h, frequency(.)),
+    fourier(., h=h, K=1)
+  )},
+  list(best.startDummy = best.startDummy, best.lenDummy = best.lenDummy)
 )
 
-fifth7OD.fit <- quote(
+bestObsDummies.fit <- substitute(
   {cbind(
-    dummies=getNthObsDummies(5, 2, length(.), frequency(.)),
-    fourier(., K=2)
-  )}
+    dummies=getNthObsDummies(best.startDummy, best.lenDummy, length(.), frequency(.)),
+    fourier(., K=1)
+  )},
+  list(best.startDummy = best.startDummy, best.lenDummy = best.lenDummy)
 )
 
-# 7:3 rmse=381, mae=180
-report.full(model = paste0('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="ML", xreg=', paste0(deparse(fifth7OD.fit), collapse='') ,')'),
+# 7:3, dummies 4:4, rmse=370.118, mae=178.8
+report.full(model = paste0('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="ML", xreg=', paste0(deparse(bestObsDummies.fit), collapse='') ,')'),
             series = '2hrs ph2',
             transformation = 'identity()',
             traindays = 7,
             testdays = 3,
-            xreg = paste0(deparse(fifth7OD.fcast), collapse=''))
-
+            xreg = paste0(deparse(bestObsDummies.fcast), collapse=''))
 

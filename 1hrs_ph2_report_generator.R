@@ -128,7 +128,8 @@ report.full(model = paste('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="
             xreg = paste('fourier(., h=h, K=', best.k, ')')) #3
 
 # Best model: 4:3, ARIMA(1, 0, 0)(1, 0, 0), K=3, RMSE=350 MAE=165 ----
-# 6th day dummies, 7:3, RMSE=340 MAE=159
+# 4:3, dummies 8:7, rmse=346, mae=164
+# for dummies: an improvement from 2hrs, since I got it down with 1 for length of the dummies
 report.full(output_format = 'pdf_document',
             model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS", xreg=fourier(., K=3))',
             series = '1hrs ph2',
@@ -137,30 +138,27 @@ report.full(output_format = 'pdf_document',
             testdays = 3,
             xreg = 'fourier(., h=h, K=3)')
 
-sixthDD.fcast <- quote(
+bestObsDummies.fcast <- substitute(
   {cbind(
-    dummies=get6thDayDummies(h, frequency(.)),
+    dummies=getNthObsDummies(8, 7, h, frequency(.)),
     fourier(., h=h, K=3)
   )}
 )
 
-sixthDD.fit <- quote(
+bestObsDummies.fit <- substitute(
   {cbind(
-    dummies=get6thDayDummies(length(.), frequency(.)),
+    dummies=getNthObsDummies(8, 7, length(.), frequency(.)),
     fourier(., K=3)
   )}
 )
 
-#7:3 rmse=340 mae=159
-#non-finite value supplied by optim for 4 days of training (like above)
-#because we talk about weeks but do not train on a full one
-#hence we use 7:3
-report.full(model = paste0('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS", xreg=', paste0(deparse(sixthDD.fit), collapse='') ,')'),
+# 4:3, dummies: 8:7, rmse=346, mae=164
+report.full(model = paste0('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS", xreg=', paste0(deparse(bestObsDummies.fit), collapse='') ,')'),
             series = '1hrs ph2',
             transformation = 'identity()',
-            traindays = 7,
+            traindays = 4,
             testdays = 3,
-            xreg = paste0(deparse(sixthDD.fcast), collapse=''))
+            xreg = paste0(deparse(bestObsDummies.fcast), collapse=''))
 
 # dummies on 6th day - 6th day has an "outlier" ----
 
@@ -178,7 +176,7 @@ sixthDD.fit <- quote(
   )}
 )
 
-#7:3 rmse=574 mae=214
+#7:3 rmse=575 mae=214
 #non-finite value supplied by optim for 4 days of training  - because we talk about weeks but do not train on one
 report.full(model = paste0('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS", xreg=', paste0(deparse(sixthDD.fit), collapse='') ,')'),
             series = '1hrs ph2',
@@ -212,14 +210,14 @@ report.full(model = paste0('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method=
             testdays = 3,
             xreg = paste0(deparse(dailyD.fcast), collapse=''))
 
-# dummies on 6-8th+1-5 obs (the "outlier") ----
+# dummies on 7-15th+1-7 obs (the "outlier") ----
 best.fcast.dummy.1hrsPh2 <- NULL
 best.startDummy <- 0
 best.lenDummy <- 0
 
-for(startDummy in 6:8)
+for(startDummy in 7:15)
 {
-  for(lenDummy in 1:5)
+  for(lenDummy in 1:7)
   {
     print(paste("Trying startDummy =", startDummy, ", length =", lenDummy))
     
@@ -272,7 +270,7 @@ bestObsDummies.fit <- substitute(
   list(best.startDummy = best.startDummy, best.lenDummy = best.lenDummy)
 )
 
-# 4:3, dummies: 8:3, rmse=347, mae=162
+# 4:3, dummies: 8:7, rmse=346, mae=164
 report.full(model = paste0('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS", xreg=', paste0(deparse(bestObsDummies.fit), collapse='') ,')'),
             series = '1hrs ph2',
             transformation = 'identity()',
@@ -280,3 +278,10 @@ report.full(model = paste0('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method=
             testdays = 3,
             xreg = paste0(deparse(bestObsDummies.fcast), collapse=''))
 
+# 4:3, dummies: 8:3, rmse=347, mae=162
+report.full(model = paste0('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS", xreg=', paste0(deparse(bestObsDummies.fit), collapse='') ,')'),
+            series = '1hrs ph2',
+            transformation = 'identity()',
+            traindays = 4,
+            testdays = 3,
+            xreg = paste0(deparse(bestObsDummies.fcast), collapse=''))
