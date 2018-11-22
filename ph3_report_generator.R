@@ -117,3 +117,26 @@ report.full(model = paste0('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method=
             testdays = 2,
             xreg = paste0(deparse(obsDummies.fcast), collapse=''),
             serial = TRUE)
+
+#direct inspiration from 1hrs ph3 - 9:2 dummies
+obsDummies.fcast <- quote(
+  {cbind(
+    dummies=getNthObsDummies(9*(frequency(.)/24)+1, 2*(frequency(.)/24), h, frequency(.)),
+    fourier(., h=h, K=2)
+  )}
+)
+
+obsDummies.fit <- quote(
+  {cbind(
+    dummies=getNthObsDummies(9*(frequency(.)/24)+1, 2*(frequency(.)/24), length(.), frequency(.)),
+    fourier(., K=2)
+  )}
+)
+
+report.full(model = paste0('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS", xreg=', paste0(deparse(obsDummies.fit), collapse='') ,')'),
+            series = 'ph3',
+            transformation = 'identity()',
+            traindays = 7,
+            testdays = 2,
+            xreg = paste0(deparse(obsDummies.fcast), collapse=''),
+            serial = TRUE)

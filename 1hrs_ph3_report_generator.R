@@ -203,7 +203,7 @@ report.full(model = paste('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="
 #  best for 7:2, ARIMA(1,0,0)(1,0,0) with fourier k=2, RMSE=311, MAE=179  ----
 # with tsclean RMSE= 320, MAE=168 
 # For observation based 168:2, same model, same k, RMSE=317, MAE =186
-# dummies: 8:3, rmse=309, mae=175
+# dummies: 9:2, rmse=308, mae=174
 report.full(output_format = "pdf_document",
             model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS", xreg=fourier(., K=2))',
             series = '1hrs ph3',
@@ -222,14 +222,14 @@ report.full(output_format = "pdf_document",
 
 obsDummies.fcast <- quote(
   {cbind(
-    dummies=getNthObsDummies(8, 3, h, frequency(.)),
+    dummies=getNthObsDummies(9, 2, h, frequency(.)),
     fourier(., h=h, K=2)
   )}
 )
 
 obsDummies.fit <- quote(
   {cbind(
-    dummies=getNthObsDummies(8, 3, length(.), frequency(.)),
+    dummies=getNthObsDummies(9, 2, length(.), frequency(.)),
     fourier(., K=2)
   )}
 )
@@ -378,12 +378,12 @@ report.full(model = paste0('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method=
             testdays = 2,
             xreg = paste0(deparse(dailyD.fcast), collapse=''))
 
-# dummies on 6-8th+1-5 obs (the "outlier") ----
+# dummies on 6-13th+1-5 obs (the "outlier") ----
 best.fcast.dummy.1hrsPh3 <- NULL
 best.startDummy <- 0
 best.lenDummy <- 0
 
-for(startDummy in 6:8)
+for(startDummy in 6:13)
 {
   for(lenDummy in 1:5)
   {
@@ -438,7 +438,7 @@ bestObsDummies.fit <- substitute(
   list(best.startDummy = best.startDummy, best.lenDummy = best.lenDummy)
 )
 
-# 7:2, dummies: 8:3, rmse=309, mae=175
+# 7:2, dummies: 9:2, rmse=308, mae=174
 report.full(model = paste0('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS", xreg=', paste0(deparse(bestObsDummies.fit), collapse='') ,')'),
             series = '1hrs ph3',
             transformation = 'identity()',
