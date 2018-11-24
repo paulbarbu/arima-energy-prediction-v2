@@ -204,6 +204,7 @@ report.full(model = paste('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="
 # with tsclean RMSE= 320, MAE=168 
 # For observation based 168:2, same model, same k, RMSE=317, MAE =186
 # dummies: 9:2, rmse=308, mae=174
+# dummies: 9:2, no SAR term, rmse=308, mae=172
 report.full(output_format = "pdf_document",
             model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS", xreg=fourier(., K=2))',
             series = '1hrs ph3',
@@ -240,6 +241,22 @@ report.full(model = paste0('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method=
             traindays = 7,
             testdays = 2,
             xreg = paste0(deparse(obsDummies.fcast), collapse=''))
+
+
+report.full(model = paste0('Arima(order=c(1, 0, 0), method="CSS", xreg=', paste0(deparse(obsDummies.fit), collapse='') ,')'),
+            series = '1hrs ph3',
+            transformation = 'identity()',
+            traindays = 7,
+            testdays = 2,
+            xreg = paste0(deparse(obsDummies.fcast), collapse=''))
+
+#same
+report.full(model = 'Arima(order=c(1, 0, 0), method="CSS", xreg=fourier(., K=2))',
+            series = '1hrs ph3',
+            transformation = 'identity()',
+            traindays = 7,
+            testdays = 2,
+            xreg = 'fourier(., h=h, K=2)')
 
 # observation based modelling ----
 best.fcast.obs.1hrsPh3 <- NULL

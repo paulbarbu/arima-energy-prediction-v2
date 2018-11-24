@@ -435,6 +435,23 @@ report.full(#output_format = 'pdf_document',
             testdays = 3,
             xreg = paste0(deparse(fifthOD.fcast), collapse=''))
 
+# same
+report.full(#output_format = 'pdf_document',
+  model = paste0('Arima(order=c(1, 0, 0), method="ML", xreg=', paste0(deparse(fifthOD.fit), collapse='') ,')'),
+  series = '2hrs ph3',
+  transformation = 'identity()',
+  traindays = 7,
+  testdays = 3,
+  xreg = paste0(deparse(fifthOD.fcast), collapse=''))
+
+# rmse320 mae=183 - worse
+report.full(model = 'Arima(order=c(1, 0, 0), method="ML", xreg=fourier(., K=2))',
+            series = '2hrs ph3',
+            transformation = 'identity()',
+            traindays = 7,
+            testdays = 3,
+            xreg = 'fourier(., h=h, K=2)')
+
 # observation based modelling ----
 report(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="ML")',
        series = '2hrs ph3',

@@ -73,6 +73,7 @@ report.full(model = paste0('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method=
             xreg = paste0(deparse(obsDummies.fcast), collapse=''),
             serial = TRUE)
 
+#TODO: run this
 #dummies, inspiration from 1hrs
 obsDummies.fcast <- quote(
   {cbind(

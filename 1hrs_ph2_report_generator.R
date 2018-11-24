@@ -130,6 +130,8 @@ report.full(model = paste('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="
 # Best model: 4:3, ARIMA(1, 0, 0)(1, 0, 0), K=3, RMSE=350 MAE=165 ----
 # 4:3, dummies 8:7, rmse=346, mae=164
 # for dummies: an improvement from 2hrs, since I got it down with 1 for length of the dummies
+# 4:3, ARIMA(1, 0, 0), K=3, RMSE=335 MAE=159
+# 4:3, dummies 8:7, rmse=331, mae=157
 report.full(output_format = 'pdf_document',
             model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS", xreg=fourier(., K=3))',
             series = '1hrs ph2',
@@ -159,6 +161,20 @@ report.full(model = paste0('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method=
             traindays = 4,
             testdays = 3,
             xreg = paste0(deparse(bestObsDummies.fcast), collapse=''))
+
+report.full(model = paste0('Arima(order=c(1, 0, 0), method="CSS", xreg=', paste0(deparse(bestObsDummies.fit), collapse='') ,')'),
+            series = '1hrs ph2',
+            transformation = 'identity()',
+            traindays = 4,
+            testdays = 3,
+            xreg = paste0(deparse(bestObsDummies.fcast), collapse=''))
+
+report.full(model = 'Arima(order=c(1, 0, 0),method="CSS", xreg=fourier(., K=3))',
+            series = '1hrs ph2',
+            transformation = 'identity()',
+            traindays = 4,
+            testdays = 3,
+            xreg = 'fourier(., h=h, K=3)')
 
 # dummies on 6th day - 6th day has an "outlier" ----
 
