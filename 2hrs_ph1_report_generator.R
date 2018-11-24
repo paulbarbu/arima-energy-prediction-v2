@@ -52,8 +52,18 @@ report(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0))',
        traindays = 7,
        testdays = 3)
 
+# two significant lags around the seasonal period
+report(model = 'Arima(order=c(1, 0, 0), seasonal=c(2, 0, 0), method="CSS")',
+       series = '2hrs ph1',
+       transformation = 'identity()',
+       diffs = 'identity()',
+       sdiffs = 'identity()',
+       startday = -10,
+       traindays = 7,
+       testdays = 3)
+
 # seems fine, but the forecast is overall a bit too high
-report(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), include.mean=FALSE)',
+report(model = 'Arima(order=c(1, 0, 0), seasonal=c(2, 0, 0), include.mean=FALSE, method="CSS")',
        series = '2hrs ph1',
        transformation = 'identity()',
        diffs = 'identity()',
@@ -63,8 +73,8 @@ report(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), include.mean=FALSE)
        testdays = 3)
 
 
-# regression with ARMA errors on fourier terms
-report(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), xreg=fourier(., K=2))',
+# regression with ARMA errors on fourier terms, (tries with 2 seasonal AR terms, but results were worse)
+report(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), xreg=fourier(., K=2), method="CSS")',
        series = '2hrs ph1',
        transformation = 'identity()',
        diffs = 'identity()',
@@ -172,7 +182,7 @@ report.full(#output_format = 'pdf_document',
   testdays = 2,
   xreg = paste0(deparse(dummies.fcast), collapse=''))
 
-# dummies on 6th day - not applicable, pattern are too crazy ----
+# dummies on 6th day - not applicable, patterns are too crazy ----
 
 # dummies on every weekday ----
 
@@ -198,7 +208,7 @@ report.full(model = paste0('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method=
             testdays = 2,
             xreg = paste0(deparse(dailyD.fcast), collapse=''))
 
-# dummies on the 5th to the 7th obs (the "outliers") ----
+# dummies on the 4-85th+1-5th obs (the "outliers") ----
 
 best.fcast.dummy.2hrsPh1 <- NULL
 best.startDummy <- 0

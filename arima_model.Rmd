@@ -337,9 +337,6 @@ results, but it is not on the plot due to simmetry and graphical reasons.
 # Future work
 
 * Add other statistical tests for stationarity, differencing, etc.
-* Allow the model to be ran on the manually transformed data (through a param)
-* Parallel processing for evaluating multiple models at the same time
-* Allow the number of Fourier terms (K) to be a vector and choose the best one automatically
 * Anderson-Darling statistical test for normality of the residuals reported along the QQ-plot
 * Maybe it would be helpful to generate the (standardised) Residuals vs fitted plot, although it wouldn't be of much help since the residuals are plotted against time and their patterns are extracted and accounted for using the ACF & PACF plots, also the Ljung-Box test for independence is computed
 
