@@ -68,7 +68,6 @@ report.full(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS", 
             xreg = 'fourier(., h=h, K=2)',
             serial = TRUE)
 
-#TODO: run this
 # inspiration from 1hrs series without SAR term
 report.full(model = 'Arima(order=c(1, 0, 0), method="CSS", xreg=fourier(., K=2))',
             series = 'ph3',
@@ -152,7 +151,6 @@ report.full(model = paste0('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method=
             serial = TRUE)
 
 
-#TODO: run this
 #direct inspiration from 1hrs ph3 - 9:2 dummies without SAR term
 obsDummies.fcast <- quote(
   {cbind(

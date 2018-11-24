@@ -48,7 +48,6 @@ report.full(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS", 
             xreg = 'fourier(., h=h, K=1)',
             serial = TRUE)
 
-#TODO: run this
 # fourier with no SAR terms, derived from the hrs serioes, since that was better for the 5min ph2 series (see above)
 report.full(model = 'Arima(order=c(1, 0, 0), method="CSS", xreg=fourier(., K=3))',
             series = 'ph2',
@@ -108,7 +107,6 @@ report.full(model = paste0('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method=
             xreg = paste0(deparse(obsDummies.fcast), collapse=''),
             serial = TRUE)
 
-#TODO: run this
 # ATTENTION: I converted from "dummies" in the `2hrs ph2 series`` to "hours", this means, I multipled by 2 to get the hourly intervals right
 # with 8th hour up to 11th hour dummies - inspiration from 2hrs series combined with the ratio from the 1hrs
 # K=3 - more complex seasonality on denser data - from 1hrs
@@ -127,6 +125,7 @@ obsDummies.fit <- quote(
   )}
 )
 
+#BEST! AND VERY FAST!
 report.full(model = paste0('Arima(order=c(1, 0, 0), method="CSS", xreg=', paste0(deparse(obsDummies.fit), collapse='') ,')'),
             series = 'ph2',
             transformation = 'identity()',
