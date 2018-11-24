@@ -38,6 +38,16 @@ report.full(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS", 
             xreg = 'fourier(., h=h, K=2)',
             serial=TRUE)
 
+#fourier terms without SAR
+# fourier terms, inspiration from both of the series
+report.full(model = 'Arima(order=c(1, 0, 0), method="CSS", xreg=fourier(., K=2))',
+            series = 'ph1',
+            transformation = 'identity()',
+            traindays = 7,
+            testdays = 2,
+            xreg = 'fourier(., h=h, K=2)',
+            serial=TRUE)
+
 #dummies, inspiration from 2hrs
 # ATTENTION: I converted from "dummies" in the `2hrs ph1 series`` to "hours", this means, I multipled by 2 to get the hourly intervals right
 # with 11th hour up to 18th hour dummies - inspiration from 2hrs series - not 12th since I want to "catch it in full"
@@ -85,3 +95,5 @@ report.full(model = paste0('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method=
             testdays = 2,
             xreg = paste0(deparse(obsDummies.fcast), collapse=''),
             serial = TRUE)
+
+#TODO: whichever gives best results from the above dummies, try without the SAR

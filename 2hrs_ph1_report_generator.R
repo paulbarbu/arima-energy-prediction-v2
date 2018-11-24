@@ -152,6 +152,8 @@ report.full(model = paste('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="
 
 # Best model: 7:2, ARIMA(1, 0, 0)(1, 0, 0), K=2, RMSE=469.4395 	MAE=223.396  ----
 # 6th-9th obs dummies rmse=464, mae=222
+# without seasonal part, only fourier: 467, mae=220
+# dummies without seasonal part, only fourier: rmse=462, mae=218
 report.full(output_format = 'pdf_document',
             model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS", xreg=fourier(., K=2))',
             series = '2hrs ph1',
@@ -182,6 +184,22 @@ report.full(#output_format = 'pdf_document',
   testdays = 2,
   xreg = paste0(deparse(dummies.fcast), collapse=''))
 
+#rmse=462, mae=218
+report.full(#output_format = 'pdf_document',
+  model = paste0('Arima(order=c(1, 0, 0), method="CSS", xreg=', paste0(deparse(dummies.fit), collapse='') ,')'),
+  series = '2hrs ph1',
+  transformation = 'identity()',
+  traindays = 7,
+  testdays = 2,
+  xreg = paste0(deparse(dummies.fcast), collapse=''))
+
+# rmse=467, mae=220
+report.full(model = 'Arima(order=c(1, 0, 0), method="CSS", xreg=fourier(., K=2))',
+            series = '2hrs ph1',
+            transformation = 'identity()',
+            traindays = 7,
+            testdays = 2,
+            xreg = 'fourier(., h=h, K=2)')
 # dummies on 6th day - not applicable, patterns are too crazy ----
 
 # dummies on every weekday ----
