@@ -1,0 +1,1 @@
+full_Arima(order=c(1, 0, 0),method="CSS", xreg=fourier(., K=3)).1hrs ph2.identity().4.3.fourier(., h=h, K=3).html

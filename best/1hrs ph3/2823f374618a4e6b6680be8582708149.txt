@@ -1,0 +1,1 @@
+full_Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS", xreg=fourier(., K=2)).1hrs ph3.identity().7.2.fourier(., h=h, K=2).html

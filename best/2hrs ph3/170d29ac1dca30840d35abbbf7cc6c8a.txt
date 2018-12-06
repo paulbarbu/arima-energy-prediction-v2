@@ -1,0 +1,1 @@
+full_Arima(order=c(1, 0, 0), method="ML", xreg=fourier(., K=2)).2hrs ph3.identity().7.3.fourier(., h=h, K=2).html
