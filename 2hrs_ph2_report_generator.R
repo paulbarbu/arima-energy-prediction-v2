@@ -142,14 +142,12 @@ report.full(model = paste('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="
 # Best model: 7:3, ARIMA(1, 0, 0)(1, 0, 0), K=1, RMSE=373.8851 MAE=184.5098 ----
 # dummies 4:4 RMSE=370  MAE=178
 # no SAR term, dummies 4:4 RMSE=366  MAE=178
-report.full(output_format = 'pdf_document',
-            model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS", xreg=fourier(., K=1))',
+report.full(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS", xreg=fourier(., K=1))',
             series = '2hrs ph2',
             transformation = 'identity()',
             traindays = 7,
             testdays = 3,
             xreg = 'fourier(., h=h, K=1)')
-
 
 bestObsDummies.fcast <- substitute(
   {cbind(

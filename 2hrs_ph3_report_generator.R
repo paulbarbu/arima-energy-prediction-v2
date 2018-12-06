@@ -397,16 +397,14 @@ report.full(model = paste('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="
 # Best model: ARIMA(1, 0, 0)(1, 0, 0) (K=2), 7:3, RMSE 318, MAE 182 || with tsclean RMSE 330, MAE 169 ----
 # For tsclean() RMSE has gone up since it applies bigger penalty to the bigger errors (there are bigger errors since tsclean "smoothes" the data hence the outliers will give even bigger errors)
 # For 5th obs: RMSE=318 ; MAE=179
-report.full(output_format = 'pdf_document',
-            model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="ML", xreg=fourier(., K=2))',
+report.full(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="ML", xreg=fourier(., K=2))',
             series = '2hrs ph3',
             transformation = 'identity()',
             traindays = 7,
             testdays = 3,
             xreg = 'fourier(., h=h, K=2)')
 
-report.full(output_format = 'pdf_document',
-            model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="ML", xreg=fourier(., K=2))',
+report.full(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="ML", xreg=fourier(., K=2))',
             series = '2hrs ph3',
             transformation = 'tsclean()',
             traindays = 7,
@@ -427,8 +425,7 @@ fifthOD.fit <- quote(
   )}
 )
 
-report.full(#output_format = 'pdf_document',
-            model = paste0('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="ML", xreg=', paste0(deparse(fifthOD.fit), collapse='') ,')'),
+report.full(model = paste0('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="ML", xreg=', paste0(deparse(fifthOD.fit), collapse='') ,')'),
             series = '2hrs ph3',
             transformation = 'identity()',
             traindays = 7,
@@ -436,8 +433,7 @@ report.full(#output_format = 'pdf_document',
             xreg = paste0(deparse(fifthOD.fcast), collapse=''))
 
 # same
-report.full(#output_format = 'pdf_document',
-  model = paste0('Arima(order=c(1, 0, 0), method="ML", xreg=', paste0(deparse(fifthOD.fit), collapse='') ,')'),
+report.full(model = paste0('Arima(order=c(1, 0, 0), method="ML", xreg=', paste0(deparse(fifthOD.fit), collapse='') ,')'),
   series = '2hrs ph3',
   transformation = 'identity()',
   traindays = 7,

@@ -130,10 +130,9 @@ report.full(model = paste('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="
 # Best model: 4:3, ARIMA(1, 0, 0)(1, 0, 0), K=3, RMSE=350 MAE=165 ----
 # 4:3, dummies 8:7, rmse=346, mae=164
 # for dummies: an improvement from 2hrs, since I got it down with 1 for length of the dummies
-# 4:3, ARIMA(1, 0, 0), K=3, RMSE=335 MAE=159
 # 4:3, dummies 8:7, rmse=331, mae=157
-report.full(output_format = 'pdf_document',
-            model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS", xreg=fourier(., K=3))',
+# 4:3, ARIMA(1, 0, 0), K=3, RMSE=335 MAE=159 - worse
+report.full(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS", xreg=fourier(., K=3))',
             series = '1hrs ph2',
             transformation = 'identity()',
             traindays = 4,

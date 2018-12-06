@@ -154,8 +154,7 @@ report.full(model = paste('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="
 # 6th-9th obs dummies rmse=464, mae=222
 # without seasonal part, only fourier: 467, mae=220
 # dummies without seasonal part, only fourier: rmse=462, mae=218
-report.full(output_format = 'pdf_document',
-            model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS", xreg=fourier(., K=2))',
+report.full(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS", xreg=fourier(., K=2))',
             series = '2hrs ph1',
             transformation = 'identity()',
             traindays = 7,
@@ -176,8 +175,7 @@ dummies.fit <- quote(
   )}
 )
 
-report.full(#output_format = 'pdf_document',
-  model = paste0('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS", xreg=', paste0(deparse(dummies.fit), collapse='') ,')'),
+report.full(model = paste0('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS", xreg=', paste0(deparse(dummies.fit), collapse='') ,')'),
   series = '2hrs ph1',
   transformation = 'identity()',
   traindays = 7,
@@ -185,8 +183,7 @@ report.full(#output_format = 'pdf_document',
   xreg = paste0(deparse(dummies.fcast), collapse=''))
 
 #rmse=462, mae=218
-report.full(#output_format = 'pdf_document',
-  model = paste0('Arima(order=c(1, 0, 0), method="CSS", xreg=', paste0(deparse(dummies.fit), collapse='') ,')'),
+report.full(model = paste0('Arima(order=c(1, 0, 0), method="CSS", xreg=', paste0(deparse(dummies.fit), collapse='') ,')'),
   series = '2hrs ph1',
   transformation = 'identity()',
   traindays = 7,
