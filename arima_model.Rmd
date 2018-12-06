@@ -12,7 +12,6 @@ params:
   obs: FALSE
 title: '`r params$model` on `r params$series`'
 author: 'Barbu Paul - Gheorghe'
-date: '`r Sys.time()`'
 output:
   html_document:
     toc: true
