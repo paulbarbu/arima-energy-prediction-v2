@@ -30,6 +30,16 @@ report(model = 'Arima(order=c(1, 0, 0))',
        traindays = 7,
        testdays = 3)
 
+#try with one MA as well since I have one significant 1st positive lag and 2nd significant negative lag
+report(model = 'Arima(order=c(1, 0, 1))',
+       series = '2hrs pv2',
+       transformation = 'identity()',
+       diffs = 'identity()',
+       sdiffs = 'identity()',
+       startday = 0,
+       traindays = 7,
+       testdays = 3)
+
 # sinusoidal ACF and 2 lag in PACF from the beginning of the dataset, but also lambda= 0.2654112
 report(model = 'Arima(order=c(2, 0, 0), lambda=0.2654112)',
        series = '2hrs pv2',
@@ -203,6 +213,15 @@ report.full(model = paste0('Arima(order=c(2, 0, 0), method="CSS", xreg=', paste0
 # no SAR, no dummies
 # rmse=457, mae=234
 report.full(model = 'Arima(order=c(1, 0, 0), method="CSS", xreg=fourier(., K=2))',
+            series = '2hrs pv2',
+            transformation = 'identity()',
+            traindays = 5,
+            testdays = 2,
+            xreg = 'fourier(., h=h, K=2)')
+
+# no SAR, no dummies, 1 MA
+# rmse=458, mae=235
+report.full(model = 'Arima(order=c(1, 0, 1), method="CSS", xreg=fourier(., K=2))',
             series = '2hrs pv2',
             transformation = 'identity()',
             traindays = 5,
