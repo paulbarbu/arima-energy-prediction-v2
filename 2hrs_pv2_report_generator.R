@@ -5,19 +5,19 @@ source('funcs.R')
 report.full(model = 'snaive()',
             series = '2hrs pv2',
             transformation = 'identity()',
-            traindays = 5,
+            traindays = 7,
             testdays = 1)
 
 report.full(model = 'meanf()',
             series = '2hrs pv2',
             transformation = 'identity()',
-            traindays = 5,
+            traindays = 7,
             testdays = 1)
 
 report.full(model = 'naive()',
             series = '2hrs pv2',
             transformation = 'identity()',
-            traindays = 5,
+            traindays = 7,
             testdays = 1)
 
 # try to find the best ARIMA model  ----
@@ -27,7 +27,7 @@ report(model = 'Arima(order=c(1, 0, 0))',
        diffs = 'identity()',
        sdiffs = 'identity()',
        startday = 0,
-       traindays = 5,
+       traindays = 7,
        testdays = 3)
 
 # sinusoidal ACF and 2 lag in PACF from the beginning of the dataset, but also lambda= 0.2654112
@@ -37,7 +37,7 @@ report(model = 'Arima(order=c(2, 0, 0), lambda=0.2654112)',
        diffs = 'identity()',
        sdiffs = 'identity()',
        startday = 0,
-       traindays = 5,
+       traindays = 7,
        testdays = 3)
 
 # sinusoidal ACF and 2 lag in PACF from the beginning of the dataset
@@ -47,7 +47,7 @@ report(model = 'Arima(order=c(2, 0, 0))',
        diffs = 'identity()',
        sdiffs = 'identity()',
        startday = 0,
-       traindays = 5,
+       traindays = 7,
        testdays = 3)
 
 # significant term in PACF, so add 1 SAR term
@@ -57,7 +57,7 @@ report(model = 'Arima(order=c(2, 0, 0), seasonal=c(1, 0, 0))',
        diffs = 'identity()',
        sdiffs = 'identity()',
        startday = 0,
-       traindays = 5,
+       traindays = 7,
        testdays = 3)
 
 # try to reduce the AR term, indeed, better results
@@ -67,7 +67,7 @@ report(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0))',
        diffs = 'identity()',
        sdiffs = 'identity()',
        startday = 0,
-       traindays = 5,
+       traindays = 7,
        testdays = 3)
 
 # add fourier terms
@@ -77,7 +77,7 @@ report(model = 'Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), xreg=fourier(., K=2
        diffs = 'identity()',
        sdiffs = 'identity()',
        startday = 0,
-       traindays = 5,
+       traindays = 7,
        testdays = 3,
        xreg='fourier(., K=2, h=h)')
 
