@@ -262,7 +262,7 @@ report.full(model = paste0('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method=
             testdays = 2,
             xreg = paste0(deparse(dailyD.fcast), collapse=''))
 
-# dummies on the ?-?th+?-?th obs (the "outliers") ----
+# dummies on the 4-8th+1-5th obs (the "outliers") ----
 
 best.fcast.dummy.2hrsPv2 <- NULL
 best.startDummy <- 0
