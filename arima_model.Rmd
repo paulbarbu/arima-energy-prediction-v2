@@ -301,6 +301,14 @@ knitr::kable(accuracy(fcast, data$test))
 
 ### Fitted values and forecasts plot against the real data
 ```{r fit-forecast-plot, echo=FALSE}
+numtotaldays <- round(length(datasets[[params$series]]$series)/frequency(data$train))
+
+startday <- params$startday
+if(params$startday < 0) 
+{
+  startday <- end(datasets[[params$series]]$series)[1] + 1 + params$startday
+}
+
 clrs <- c("blueviolet", "blue", "darkgoldenrod4", "red")
 
 plt <- autoplot(fcast) +
@@ -311,7 +319,8 @@ plt <- autoplot(fcast) +
   ylab("Energy [Watts]") +
   guides(colour=guide_legend(title="Data series"), 
          fill=guide_legend(title="Prediction interval")) +
-  scale_color_manual(values=clrs)
+  scale_color_manual(values=clrs) +
+  scale_x_continuous(breaks=seq(from=startday, to=startday + params$traindays + params$testdays, by=2))
 
 if(use_transformation)
 {
@@ -329,7 +338,7 @@ this usually means the point forecast plus/minus twice the standard error.
 
 The lower part of the interval should be limited at zero during the
 interpretation of the
-results, but it is not on the plot due to simmetry and graphical reasons.
+results, but it is not on the plot due to symmetry and graphical reasons.
 
 
 
