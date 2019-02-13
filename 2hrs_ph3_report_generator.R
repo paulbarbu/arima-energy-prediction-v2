@@ -631,6 +631,50 @@ report(model = paste0('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS"
        testdays = 3,
        xreg = paste0(deparse(fifthOD.fcast), collapse=''))
 
+# dummies on the 5th obs (the "outlier")  without seasonal terms, with Fourier ----
+
+fifthOD.fcast <- quote(
+  {cbind(
+    dummies=getNthObsDummies(5, 1, h, frequency(.)),
+    fourier(., h=h, K=2)
+  )}
+)
+
+fifthOD.fit <- quote(
+  {cbind(
+    dummies=getNthObsDummies(5, 1, length(.), frequency(.)),
+    fourier(., K=2)
+  )}
+)
+
+report(model = paste0('Arima(order=c(1, 0, 0), method="CSS", xreg=', paste0(deparse(fifthOD.fit), collapse='') ,')'),
+       series = '2hrs ph3',
+       transformation = 'identity()',
+       traindays = 7,
+       testdays = 3,
+       xreg = paste0(deparse(fifthOD.fcast), collapse=''))
+
+# dummies on the 5-9th obs (the "outlier")  with seasonal terms, without Fourier ----
+
+fifthOD.fcast <- quote(
+  {cbind(
+    dummies=getNthObsDummies(5, 4, h, frequency(.))
+  )}
+)
+
+fifthOD.fit <- quote(
+  {cbind(
+    dummies=getNthObsDummies(5, 4, length(.), frequency(.))
+  )}
+)
+
+report(model = paste0('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="CSS", xreg=', paste0(deparse(fifthOD.fit), collapse='') ,')'),
+       series = '2hrs ph3',
+       transformation = 'identity()',
+       traindays = 7,
+       testdays = 3,
+       xreg = paste0(deparse(fifthOD.fcast), collapse=''))
+
 # 7:3 rmse=318, mae=179
 report.full(model = paste0('Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0), method="ML", xreg=', paste0(deparse(fifthOD.fit), collapse='') ,')'),
             series = '2hrs ph3',
