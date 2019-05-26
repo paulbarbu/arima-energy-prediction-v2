@@ -67,6 +67,7 @@ This is needed in order to be able to dinamically change the external regressors
 Both `render` and `render.full` will generate a report file (either in HTML or PDF format), the report's source code can be inspected in `arima_model.Rmd` and in `full_forecast_model.Rmd` respectively.
 At the core of creating a report for the full data is the `fullforecast` function, which accepts the same parameters as `report.full`,
 the main difference being that the data is not passed in by its name, instead the values in the set are used now (as a `ts` variable).
+Note that the `arima_model.Rmd` file and `full_forecast_model.Rmd` files can be run individually from RStudio by setting the correct parameters at the top of the files.
 
 The results of the `report.full` call are stored in a separate directory, each time series will have its forecasted results in its own directory.
 The results are composed of five file types:
