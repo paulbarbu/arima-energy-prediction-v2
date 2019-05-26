@@ -95,6 +95,11 @@ Each TXT file in there holds the correctly sampled (according to the name) versi
  
 License (MIT)
 =============
+Please note that this is my dissertation project for which I have an exam in July 2019.
+Please note that I do not claim any rights on the data used in this project.
+The data is the same one used by Stefan Feilmeier in "Stefan Feilmeier. Loads management based on Photovoltaic and Energy Storage System.
+MSc Thesis, "Lucian Blaga" University of Sibiu, Supervisor: Árpád Gellért, 2015."
+
 Copyright 2018-2019 (c) Barbu Paul - Gheorghe
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
