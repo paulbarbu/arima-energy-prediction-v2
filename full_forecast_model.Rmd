@@ -177,13 +177,23 @@ knitr::kable(fcast$accuracy)
 
 ## Forecasts (adjusted) plot against the data
 ```{r plot-forecast-adjusted, echo=FALSE}
-autoplot(fulldata.transformed,
-         series=ifelse(use_transformation, "Transformed", "Original")) +
-  autolayer(fcast$adjpoints, series="Forecasts") +
+# autoplot(fulldata.transformed,
+#          series=ifelse(use_transformation, "Transformed", "Original")) +
+#   autolayer(fcast$adjpoints, series="Forecasts") +
+#   xlab("Observation [days]") +
+#   ylab("Energy [Watts]") +
+#   ggtitle("Original data and forecasts") + 
+#   guides(colour=guide_legend(title="Data series"))
+
+lbls <- c("Original", "Forecasts")
+autoplot(ts.union(fulldata.transformed, fcast$adjpoints)) +
+  geom_point(aes(shape=series)) +
+  scale_shape_discrete(labels=lbls) +
+  scale_color_manual(labels=lbls, values=c("#00BFC4", "#F8766D")) +
+  labs(shape="Data series", color="Data series") +
   xlab("Observation [days]") +
   ylab("Energy [Watts]") +
-  ggtitle("Original data and forecasts") + 
-  guides(colour=guide_legend(title="Data series"))
+  ggtitle("Original data and forecasts")
 ```
 
 ## Accuracy of the adjusted forecasts against the data

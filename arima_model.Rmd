@@ -2,6 +2,8 @@
 params:
   series: '2hrs ph3'
   model: Arima(order=c(1, 0, 0), seasonal=c(1, 0, 0))
+  #model: Arima(order=c(1, 0, 0), xreg=fourier(., K=2))
+  #file:///D:/Personal/Dropbox/Facultate/ARIMA/v2/2hrs_ph3/Arima(order=c(1,%200,%200),%20seasonal=c(1,%200,%200),%20method=CSS,%20xreg=%7B%20%20%20%20cbind(dummies%20=%20getNthObsDummies(--d7ae590d5a60d061cd092b908e88f148.html
   transformation: identity() #log() %>% (function(d) {d[d==-Inf]<-0; d})
   diffs: identity() # diff() %>% diff()
   sdiffs: identity() # diff(lag=frequency(data$train))
@@ -9,6 +11,8 @@ params:
   traindays: 7
   testdays: 3
   xreg: NULL
+  #xreg: fourier(., K=2)
+  #
   obs: FALSE
 title: '`r params$model` on `r params$series`'
 author: 'Barbu Paul - Gheorghe'
@@ -27,6 +31,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r includes, warning=FALSE, include=FALSE}
 library(forecast)
 library(ggplot2)
+library(scales)
 library(tictoc)
 
 source('datasets.R')
@@ -72,13 +77,43 @@ if(params$obs)
                    params$startday,
                    params$traindays, params$testdays)
 }
+# 
+# autoplot(ts.union(data$test, data$train), facets = FALSE) +
+#  aes(linetype = series, color= series) +
+#  scale_linetype_manual(labels = c("Actual", "Forecasted"), values = c(2, 1)) #+
+# 
+# autoplot(ts.union(data$test, data$train)) +
+#  aes(linetype = series, color= series) +
+#  scale_linetype_manual(values = c(2, 1), name="Data series", labels=c("Test", "Train")) +
+#   scale_color_manual(values = c(2, 1), name="Data series", labels=c("Test", "Train")) +
+#  xlab("Observation [days]") +
+#   ylab("Energy [Watts]") +
+#   ggtitle("Original data") #+ 
+#   #guides(colour=guide_legend(title="Data series")) 
 
-autoplot(data$train, series="Train") +
-  autolayer(data$test, series="Test") +
+lbls <- c("Test", "Train")
+autoplot(ts.union(data$test, data$train)) +
+  geom_point(aes(shape=series)) +
+  scale_shape_discrete(labels=lbls) +
+  scale_color_discrete(labels=lbls) +
+  scale_x_continuous(breaks=pretty_breaks()) + 
+  labs(shape="Data series", color="Data series") +
   xlab("Observation [days]") +
   ylab("Energy [Watts]") +
-  ggtitle("Original data") + 
-  guides(colour=guide_legend(title="Data series"))
+  ggtitle("Original data")
+# 
+# test_layer <- autolayer(data$test, series="Test") 
+# test_values <- test_layer$layer_data()
+# 
+# autoplot(data$train, series="Train") +
+#   test_layer +
+#   geom_point() +
+#   geom_point(data = test_values, aes(x = timeVal, y = seriesVal), shape=17) + 
+#   xlab("Observation [days]") +
+#   ylab("Energy [Watts]") +
+#   
+#   ggtitle("Original data") + 
+#   #guides(colour=guide_legend(title="Data series"))
 ```
 
 Total data points: **`r length(datasets[[params$series]]$series)`** representing
@@ -93,11 +128,18 @@ Number of data points per day: **`r frequency(data$train)`**
 if(!params$obs)
 {
 season.labels = seq(frequency(data$train))
+# ggseasonplot(data$train, season.labels = season.labels) +
+#   xlab("Season") +
+#   ylab("Energy [Watts]") +
+#   guides(colour=guide_legend(title="Day")) +
+#   ggtitle('Seasonal plot for training data') 
+
 ggseasonplot(data$train, season.labels = season.labels) +
   xlab("Season") +
   ylab("Energy [Watts]") +
-  guides(colour=guide_legend(title="Day")) +
-  ggtitle('Seasonal plot for training data')
+  ggtitle('Seasonal plot for training data') +
+  geom_point(aes(shape=year)) +
+  labs(color="Day", shape="Day")
 }
 
 if(!params$obs)
@@ -309,26 +351,105 @@ if(params$startday < 0)
 {
   startday <- end(datasets[[params$series]]$series)[1] + 1 + params$startday
 }
+# 
+# clrs <- c("blueviolet", "blue", "darkgoldenrod4", "red")
+# 
+# plt <- autoplot(fcast) +
+#   autolayer(fcast$mean, series="Forecast") +
+#   autolayer(fitted(fit), series='Fitted') + 
+#   autolayer(data$test, series='Test') +
+#   xlab("Observation [days]") +
+#   ylab("Energy [Watts]") +
+#   guides(colour=guide_legend(title="Data series"), 
+#          fill=guide_legend(title="Prediction interval")) +
+#   scale_color_manual(values=clrs) +
+#   scale_x_continuous(breaks=seq(from=startday, to=startday + params$traindays + params$testdays, by=2))
+# 
+# if(use_transformation)
+# {
+#   plt + autolayer(data$train.transformed, series = 'Train Transformed') 
+# }else{
+#   plt + autolayer(data$train, series = 'Train') 
+# }
 
-clrs <- c("blueviolet", "blue", "darkgoldenrod4", "red")
 
-plt <- autoplot(fcast) +
-  autolayer(fcast$mean, series="Forecast") +
-  autolayer(fitted(fit), series='Fitted') + 
-  autolayer(data$test, series='Test') +
+res_lbls <- c("Train", "Forecast", "Fitted", "Test")
+
+# autoplot(ts.union(data$train, fcast$mean, fitted(fit), data$test)) +
+#  aes(shape=series, linetype = series, color= series) +
+#  scale_linetype_manual(values = c(12, 6, 2, 1), name="Data series", labels=lbls) +
+#   scale_color_manual(values = clrs, name="Data series", labels=lbls) +
+#  xlab("Observation [days]") +
+#   ylab("Energy [Watts]") +
+#   ggtitle(fcast$method)
+
+autoplot(ts.union(data$train, fcast$mean, fitted(fit), data$test)) +
+  geom_point(aes(shape=series)) +
+  labs(color="Data series", shape="Data series") +
+  scale_shape_discrete(labels=res_lbls) +
+  scale_color_discrete(labels=res_lbls) +
+  scale_x_continuous(breaks= pretty_breaks()) +
   xlab("Observation [days]") +
   ylab("Energy [Watts]") +
-  guides(colour=guide_legend(title="Data series"), 
-         fill=guide_legend(title="Prediction interval")) +
-  scale_color_manual(values=clrs) +
-  scale_x_continuous(breaks=seq(from=startday, to=startday + params$traindays + params$testdays, by=2))
+  ggtitle(fcast$method)
 
-if(use_transformation)
-{
-  plt + autolayer(data$train.transformed, series = 'Train Transformed') 
-}else{
-  plt + autolayer(data$train, series = 'Train') 
-}
+
+#https://stackoverflow.com/questions/49994580/autoplot-function-behaves-differently-when-i-load-ggfortify
+
+#for_plot <- ggfortify:::fortify.forecast(fcast, ts.connect = TRUE)#, is.date=FALSE)
+#for_plot$Index <- as.numeric(format(for_plot$Index,'%Y%m%d'))
+#for_plot <- dplyr::rename(for_plot, Data="Train")
+#for_plot <- ggfortify:::fortify.forecast(fcast, ts.connect = TRUE)
+#
+# ggplot(data = for_plot) +
+#   geom_line(aes(x= Index, y = Data, color = "raw")) +
+#   geom_point(aes(x= Index, y = Data, shape="raw", color="raw")) +
+#   geom_line(aes(x= Index, y = Fitted, color = "fitted")) +
+#   geom_line(aes(x= Index, y = `Point Forecast`, color = "point forecast")) +
+#   geom_ribbon(aes(x= Index, ymin = `Lo 80`, ymax = `Hi 80`,  fill = "80"),  alpha = 0.2) +
+#   geom_ribbon(aes(x= Index, ymin = `Lo 95`, ymax = `Hi 95`,  fill = "95"),  alpha = 0.2) +
+#   #scale_x_continuous(breaks= pretty_breaks()) +
+#   #scale_fill_manual("what", values = c("blue", "dodgerblue"))+
+#   #scale_color_manual("why", values = c("blue", "red", "green"))
+#   scale_fill_discrete("what") +
+#   scale_color_discrete("why") +
+#   scale_shape_discrete("why")
+#
+# for_plot_lines <- for_plot %>%
+#   gather(key, value, 2:4) %>%
+#   select(key, value, Index)
+
+
+
+# for_plot %>%
+#   filter(!is.na(`Point Forecast`)) %>%
+#   gather(Lo, ymin, `Lo 95`, `Lo 80`) %>%
+#   gather(Hi, ymax, `Hi 95`, `Hi 80`) -> for_plot_ribbon
+# 
+# for_plot %>%
+#   filter(!is.na(`Point Forecast`)) %>%
+#   gather(Lo, ymin, c( "Lo 95")) %>%
+#   gather(Hi, ymax, c( "Hi 95")) -> for_plot_ribbon95
+# 
+# for_plot %>%
+#   filter(!is.na(`Point Forecast`)) %>%
+#   gather(Lo, ymin, c("Lo 80")) %>%
+#   gather(Hi, ymax, c("Hi 80")) -> for_plot_ribbon80
+# 
+# ggplot(data = for_plot_lines) +
+#   geom_line(aes(x= Index, y = value, color = key)) +
+#   geom_point(aes(x= Index, y = value, shape = key, color=key)) +
+#   geom_ribbon(data = for_plot_ribbon80, aes(x= Index, ymin = ymin, ymax = ymax, fill = Hi), alpha = 0.2)+
+#   geom_ribbon(data = for_plot_ribbon95, aes(x= Index, ymin = ymin, ymax = ymax, fill = Hi), alpha = 0.2)+
+#   scale_shape_discrete(labels=res_lbls) +
+#   scale_color_discrete(labels=res_lbls) +
+#   scale_fill_discrete(labels=c(80, 95)) +
+#   labs(color="Data series", shape="Data series", fill="Prediction interval") +
+#   scale_x_continuous(breaks=c(142, 150)) +
+#   xlab("Observation [days]") +
+#   ylab("Energy [Watts]") +
+#   ggtitle(fcast$method)
+
 ```
 
 Please note that the negative prediction intervals are due to the way these are
